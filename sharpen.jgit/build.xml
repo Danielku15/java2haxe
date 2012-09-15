@@ -1,0 +1,287 @@
+<project name="">
+
+	<property name="eclipse.home" location="D:\dev\tools\eclipse\" />
+	<property name="eclipse" location="${eclipse.home}\eclipse.exe" />
+
+	<property name="git.path" location="C:\Program Files (x86)\git\bin\" />
+	<property name="git.exe" location="${git.path}/git.exe" />
+	<property name="patch.exe" location="${git.path}/patch.exe" />
+	<property name="sh.exe" location="${git.path}/sh.exe" />
+
+	<property name="jgit.git.repo" value="git://git.eclipse.org/gitroot/jgit/jgit.git" />
+	<property name="jgit.dir" location="source" />
+	<property name="jgit.source" location="${jgit.dir}/README" />
+
+	<property name="hxgit.dir" location="generated" />
+
+	<property name="jsch.source" location="${jgit.dir}/jsch/README" />
+	<property name="jsch.release" value="0.1.46" />
+	<property name="jsch.url" value="http://freefr.dl.sourceforge.net/project/jsch/jsch/${jsch.release}/jsch-${jsch.release}.zip" />
+
+	<property name="jzlib.source" location="${jgit.dir}/jzlib" />
+	<property name="jzlib.release" value="1.0.7" />
+	<property name="jzlib.url" value="http://www.jcraft.com/jzlib/jzlib-${jzlib.release}.zip" />
+
+	<property name="bin.path" location="bin/" />
+	<property name="java.patch" location="java.patch" />
+
+	<property name="lastrev" value="ef6aec3a04c8403037779e8122fa4c89af7d3d0b" />
+
+	<macrodef name="git">
+		<attribute name="command" />
+		<attribute name="dir" default="" />
+		<element name="args" optional="true" />
+		<sequential>
+			<echo message="git @{command}" />
+			<exec executable="${git.exe}" dir="@{dir}">
+				<arg value="@{command}" />
+				<args />
+			</exec>
+		</sequential>
+	</macrodef>
+
+	<macrodef name="sharpen">
+		<attribute name="directory" />
+		<attribute name="project" />
+		<attribute name="sources" />
+		<attribute name="options" />
+		<attribute name="outdir" />
+		<attribute name="header" />
+		<sequential>
+			<delete dir="@{directory}/build" />
+			<mkdir dir="@{directory}/build/@{project}" />
+			<copy todir="@{directory}/build/@{project}/@{sources}">
+				<fileset dir="@{directory}/@{sources}" includes="**" />
+			</copy>
+			<java fork="true" classname="org.eclipse.core.launcher.Main" failonerror="true">
+				<jvmarg value="-Xms256m" />
+				<jvmarg value="-Xmx512m" />
+				<sysproperty key="eclipse.consoleLog" value="true" />
+				<classpath>
+					<fileset dir="${eclipse.home}/plugins">
+						<include name="**/org.eclipse.equinox.launcher_*.jar" />
+					</fileset>
+				</classpath>
+				<arg value="-consoleLog" />
+				<arg value="-data" />
+				<arg file="@{directory}/build/" />
+				<arg value="-application" />
+				<arg value="sharpen.core.application" />
+				<arg value="@{project}/@{sources}" />
+				<arg value="@@${user.dir}/@{options}" />
+				<arg value="-header" />
+				<arg value="${user.dir}/@{header}" />
+			</java>
+			<mkdir dir="@{outdir}"/>
+			<copy todir="@{outdir}">
+				<fileset dir="@{directory}/build/@{project}.net/@{sources}" includes="**" />
+			</copy>
+		</sequential>
+	</macrodef>
+	
+	<target name="prepare">
+		<first id="junit.jar.result">
+			<fileset dir="${eclipse.home}/plugins/" includes="org.junit*/*.jar" />
+		</first>
+		<exec executable="${git.path}/sed.exe" inputstring="${toString:junit.jar.result}" outputproperty="junit.jar">
+			<arg value="s/\\/\//g" />
+		</exec>	
+		<echo message="Junit: ${junit.jar}" />
+		
+		<first id="hamcrest.jar.result">
+			<fileset dir="${eclipse.home}/plugins/" includes="org.hamcrest*.jar" />
+		</first>
+		<exec executable="${git.path}/sed.exe" inputstring="${toString:hamcrest.jar.result}" outputproperty="hamcrest.jar">
+			<arg value="s/\\/\//g" />
+		</exec>	
+		<echo message="Hamcrest: ${hamcrest.jar}" />
+		
+		<exec executable="${git.path}/sed.exe" inputstring="${user.dir}/bin" outputproperty="binpath">
+			<arg value="s/\\/\//g" />
+		</exec>	
+		<echo message="Binpath: ${binpath}" />
+		
+		<exec executable="${sh.exe}">
+			<env key="PATH" value="${env.PATH};${git.path}" />
+			<arg value="-c" />
+			<arg value="sed -e s#@JUNIT_JAR@#${junit.jar}# -e s#@HAMCREST_JAR@#${hamcrest.jar}# -e s#@BIN_PATH@#${binpath}# &lt; sharpen-options.in &gt; sharpen-options" />
+		</exec>		
+		
+	</target>
+
+	<target name="jzlib.source">
+		<echo message="Getting JZlib sources" />
+		<get dest="." src="${jzlib.url}" />
+
+		<echo message="Unpacking JZlib" />
+		<delete dir="jzlib-${jzlib.release}" />
+		<unzip dest="." src="jzlib-${jzlib.release}.zip" />
+		<delete file="jzlib-${jzlib.release}.zip" />
+		<mkdir dir="${jgit.dir}" />
+		<move file="jzlib-${jzlib.release}" tofile="${jgit.dir}/jzlib/" />
+		<mkdir dir="${jgit.dir}/jzlib/src" />
+		<move file="${jgit.dir}/jzlib/com" tofile="${jgit.dir}/jzlib/src/com" />
+
+		<echo message="Building JZlib" />
+		<javac fork="true" debug="true" target="1.5" source="1.5" destdir="${bin.path}" srcdir="${jgit.dir}/jzlib/src" encoding="UTF-8">
+		</javac>
+	</target>
+
+
+	<target name="jsch.source">
+		<echo message="Getting JSch sources" />
+		<delete dir="jsch-${jsch.release}" />
+		<get dest="." src="${jsch.url}" />
+
+		<echo message="Unpacking JSch" />
+		<unzip dest="." src="jsch-${jsch.release}.zip" />
+		<delete dir="jsch-${jsch.release}.zip" />
+		<mkdir dir="${jgit.dir}/jsch" />
+		<move file="jsch-${jsch.release}" tofile="${jgit.dir}/jsch" />
+		<move file="${jgit.dir}/jsch/src/main/java/" tofile="${jgit.dir}/jsch/src" />
+		<delete dir="jsch-${jsch.release}" />
+
+		<echo message="Building JSch" />
+		<javac fork="true" debug="true" target="1.5" source="1.5" destdir="${bin.path}" srcdir="${jgit.dir}/jsch/src" encoding="UTF-8">
+		</javac>
+	</target>
+
+	<target name="jgit.source">
+		<echo message="Getting jgit source" />
+		<mkdir dir="${jgit.dir}" />
+		<git command="clone">
+			<args>
+				<arg value="${jgit.git.repo}" />
+				<arg value="${jgit.dir}" />
+			</args>
+		</git>
+	</target>
+
+	<target name="fetch">
+		<antcall target="jgit.source" />
+		<antcall target="jzlib.source" />
+		<antcall target="jsch.source" />
+
+		<echo message="Pulling git sources" />
+		<git command="reset" dir="${jgit.dir}">
+			<args>
+				<arg value="--hard" />
+			</args>
+		</git>
+		<git command="checkout" dir="${jgit.dir}">
+			<args>
+				<arg value="master" />
+			</args>
+		</git>
+		<git command="pull" dir="${jgit.dir}">
+			<args>
+				<arg value="origin" />
+			</args>
+		</git>
+		<echo message="Applying previous java patch" />
+		<git command="checkout" dir="${jgit.dir}">
+			<args>
+				<arg value="${lastrev}" />
+			</args>
+		</git>
+		<delete dir="${hxgit.dir}" />
+		<exec executable="${patch.exe}" input="${java.patch}">
+			<arg value="-s" />
+			<arg value="-d" />
+			<arg value="${jgit.dir}" />
+			<arg value="-p1" />
+		</exec>
+		<echo message="Building jgit" />
+		<javac fork="true" debug="true" target="1.5" source="1.5" destdir="${bin.path}" srcdir="${jgit.dir}/org.eclipse.jgit/src" encoding="UTF-8">
+			<classpath>
+				<path location="${bin.path}" />
+			</classpath>
+		</javac>
+		<echo message="Building jgit.junit (${junit.jar})" />
+		<javac fork="true" debug="true" target="1.5" source="1.5" destdir="${bin.path}" srcdir="${jgit.dir}/org.eclipse.jgit.junit/src" encoding="UTF-8">
+			<classpath>
+				<path location="${bin.path}" />
+				<fileset dir="${eclipse.home}/plugins/" includes="org.junit*/*.jar" />
+			</classpath>
+		</javac>
+		<echo message="Generating code for jzlib" />
+		<sharpen directory="${jgit.dir}/jzlib" project="jzlib" sources="src" options="sharpen-options" outdir="${hxgit.dir}/hxzlib" header="jzlib.header" />
+		<echo message="Generating code for jsch" />
+		<sharpen directory="${jgit.dir}/jsch" project="jsch" sources="src" options="sharpen-options" outdir="${hxgit.dir}/HxSch" header="jsch.header" />
+		<echo message="Generating code for jgit (previous revision)" />
+		<sharpen directory="${jgit.dir}/org.eclipse.jgit" project="org.eclipse.jgit" sources="src" options="sharpen-options" outdir="${hxgit.dir}/HxGit" header="jgit.header" />
+
+		<git command="init">
+			<args>
+				<arg value="${hxgit.dir}" />
+			</args>
+		</git>
+		<git command="add" dir="${hxgit.dir}">
+			<args>
+				<arg value="." />
+			</args>
+		</git>
+		<git command="commit" dir="${hxgit.dir}">
+			<args>
+				<arg value="-a" />
+				<arg value="-m" />
+				<arg value="Initial commit" />
+			</args>
+		</git>
+		<echo message="Done." />
+	</target>
+
+	<target name="merge">
+		<git command="reset" dir="${jgit.dir}">
+			<args>
+				<arg value="--hard" />
+			</args>
+		</git>
+		<git command="checkout" dir="${jgit.dir}">
+			<args>
+				<arg value="master" />
+			</args>
+		</git>
+		<echo message="Building jgit" />
+		<javac fork="true" debug="true" target="1.5" source="1.5" destdir="${bin.path}" srcdir="${jgit.dir}/org.eclipse.jgit/src" encoding="UTF-8">
+			<classpath>
+				<path location="${bin.path}" />
+			</classpath>
+		</javac>
+		<echo message="Building jgit.junit" />
+		<javac fork="true" debug="true" target="1.5" source="1.5" destdir="${bin.path}" srcdir="${jgit.dir}/org.eclipse.jgit.junit/src" encoding="UTF-8">
+			<classpath>
+				<path location="${bin.path}" />
+			</classpath>
+		</javac>
+	</target>
+
+	<target name="pull" depends="prepare">
+		<delete dir="${jgit.dir}" />
+		<antcall target="fetch" />
+		<antcall target="merge" />
+	</target>
+
+
+	<target name="convert" depends="prepare">
+		<echo message="Building jgit" />
+		<javac fork="true" debug="true" target="1.5" source="1.5" destdir="${bin.path}" srcdir="${jgit.dir}/org.eclipse.jgit/src" encoding="UTF-8">
+			<classpath>
+				<path location="${bin.path}" />
+			</classpath>
+		</javac>
+		<echo message="Building jgit.junit (${junit.jar})" />
+		<javac fork="true" debug="true" target="1.5" source="1.5" destdir="${bin.path}" srcdir="${jgit.dir}/org.eclipse.jgit.junit/src" encoding="UTF-8">
+			<classpath>
+				<path location="${bin.path}" />
+				<fileset dir="${eclipse.home}/plugins/" includes="org.junit*/*.jar" />
+			</classpath>
+		</javac>
+		<echo message="Generating code for jzlib" />
+		<sharpen directory="${jgit.dir}/jzlib" project="jzlib" sources="src" options="sharpen-options" outdir="${hxgit.dir}/hxzlib" header="jzlib.header" />
+		<echo message="Generating code for jsch" />
+		<sharpen directory="${jgit.dir}/jsch" project="jsch" sources="src" options="sharpen-options" outdir="${hxgit.dir}/HxSch" header="jsch.header" />
+		<echo message="Generating code for jgit (previous revision)" />
+		<sharpen directory="${jgit.dir}/org.eclipse.jgit" project="org.eclipse.jgit" sources="src" options="sharpen-options" outdir="${hxgit.dir}/HxGit" header="jgit.header" />
+	</target>
+</project>

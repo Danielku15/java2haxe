@@ -1,16 +1,31 @@
 # About
-This small command-line utility allows the conversion of a XMI file created
-by MoDisco to Haxe source. Simply convert any Java project to a XMI file using
-the MoDisco plugin and run this converter to get Haxe source.
+This program converts Java source to Haxe source using a modified
+version of Sharpen, a Java to C# converter. 
 
-NOTE: This project is still work in progress and not usable yet. Feel free to contribute.
+# Contents
+## sharpen.core
+This eclipse project contains a modified version of Sharpen. 
+
+## sharpen.jgit
+This directory contains an example usage of Sharpen to convert Java to Haxe source. 
+As an example it converts the JGit source to Haxe. The build file is based on the 
+make file of NGit. 
 
 # Usage
-1. Install MoDisco (http://wiki.eclipse.org/MoDisco/Installation) into your Eclipse IDE (http://eclipse.org)
-2. Convert the Java project you'd like to convert to Haxe to an XMI Model (http://download.eclipse.org/modeling/mdt/modisco/nightly/doc/org.eclipse.modisco.java.doc/mediawiki/java_discoverer/user.html)
-3. Run this utility to translate the XMI file to Haxe source
+1. Import the Eclipse projects to your workspace
+2. Export the sharpen.core project (Deployable plug-ins and fragments) to your Eclipse home directory 
+3. Adjust the paths in the sharpen.jgit/build.xml to match your system.
+4. Run the build.xml using ant (pull target)
+5. The Haxe source can be found in the generated directory. 
 
-    java java2haxe.Converter [xmi-file] [output-dir]
+or
 
-# Info
-* MoDisco Website (http://wiki.eclipse.org/MoDisco/) 
+1. Copy the dist/sharpen.core.jar to your Eclipse\Plugins directory
+2. Adjust the paths in the sharpen.jgit/build.xml to match your system.
+3. Run the build.xml using ant (pull target)
+4. The Haxe source can be found in the generated directory. 
+
+# Links
+* Sharpen - http://community.versant.com/Documentation/Reference/db4o-7.12/java/reference/html/Content/sharpen.html
+* JGit - http://www.eclipse.org/jgit/
+* NGit - https://github.com/mono/ngit

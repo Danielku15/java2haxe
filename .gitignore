@@ -1,2 +1,5 @@
-bin/
-test/output
+**/bin/
+**/.settings/
+sharpen.jgit/sharpen-options
+sharpen.jgit/generated/
+sharpen.jgit/source/

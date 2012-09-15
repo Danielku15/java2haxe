@@ -1,0 +1,194 @@
+-nativeTypeSystem
+-organizeUsings
+
+-cp @HAMCREST_JAR@
+-cp @JUNIT_JAR@
+-cp @BIN_PATH@
+
+-typeMapping boolean Bool
+-typeMapping void Void
+-typeMapping char Char
+-typeMapping byte Byte
+-typeMapping short Short
+-typeMapping int Int
+-typeMapping long Long
+-typeMapping float Float
+-typeMapping double Float
+
+-typeMapping java.lang.Object dynamic
+-typeMapping java.lang.String String
+-typeMapping java.lang.Character Char
+-typeMapping java.lang.Byte Byte
+-typeMapping java.lang.Boolean Bool
+-typeMapping java.lang.Short Short
+-typeMapping java.lang.Integer Int
+-typeMapping java.lang.Long Long
+-typeMapping java.lang.Float Float
+-typeMapping java.lang.Double Double
+
+-namespaceMapping org.eclipse.jgit.lib hxgit.lib
+-namespaceMapping org.eclipse.jgit hxgit
+-fullyQualify CommitBuilder
+-fullyQualify CheckoutConflictException
+
+-namespaceMapping com.jcraft.jsch hxsch
+-typeMapping com.jcraft.jsch.ChannelSftp.Header hxsch.header.ChannelHeader
+-methodMapping com.jcraft.jsch.Request.request DoRequest
+
+-namespaceMapping com.jcraft.jzlib hxzlib
+
+-namespaceMapping java.lang.ref Haxen
+-namespaceMapping java.lang Haxen
+-namespaceMapping java.io Haxen
+-namespaceMapping java.util.concurrent.atomic Haxen
+-namespaceMapping java.util.concurrent.locks Haxen
+-namespaceMapping java.util.concurrent Haxen
+-namespaceMapping java.util.zip Haxen
+-namespaceMapping java.util.regex Haxen
+-namespaceMapping java.util Haxen
+-namespaceMapping java.nio.channels Haxen
+-namespaceMapping java.nio.charset Haxen
+-namespaceMapping java.nio Haxen
+-namespaceMapping java.text Haxen
+-namespaceMapping java.net Haxen
+-namespaceMapping javax.crypto.interfaces Haxen
+-namespaceMapping javax.crypto.spec Haxen
+-namespaceMapping javax.crypto Haxen
+-namespaceMapping java.security.interfaces Haxen
+-namespaceMapping java.security.spec Haxen
+-namespaceMapping java.security.cert Haxen
+-namespaceMapping java.security Haxen
+-namespaceMapping javax.net.ssl Haxen
+-namespaceMapping org.ietf.jgss Haxen
+-methodMapping java.lang.Object.memberwiseClone Clone
+-methodMapping java.nio.charset.Charset.forName Haxen.Extensions.GetEncoding
+-methodMapping java.util.List<>.remove RemoveAt
+-methodMapping java.util.IList<>.remove RemoveAt
+-methodMapping java.util.ArrayList.remove RemoveAt
+-methodMapping java.lang.Integer.toOctalString Haxen.Extensions.ToOctalString
+-methodMapping java.lang.Integer.toHexString Haxen.Extensions.ToHexString
+-methodMapping java.lang.Integer.bitCount Haxen.Extensions.BitCount
+-methodMapping java.lang.Integer.numberOfLeadingZeros Haxen.Extensions.NumberOfLeadingZeros
+-methodMapping java.lang.Integer.numberOfTrailingZeros Haxen.Extensions.NumberOfTrailingZeros
+-methodMapping java.lang.Integer.lowestOneBit Haxen.Extensions.LowestOneBit
+-methodMapping java.lang.Boolean.valueOf Haxen.Extensions.ValueOf
+-methodMapping java.lang.Boolean.parseBoolean System.Boolean.Parse
+-methodMapping java.lang.Integer.valueOf Haxen.Extensions.ValueOf
+-methodMapping java.lang.Integer.toString Haxen.Extensions.ToString
+-methodMapping java.lang.Long.valueOf Haxen.Extensions.ValueOf
+-methodMapping java.util.Random.nextInt Next
+-methodMapping java.util.Arrays.binarySearch System.Array.BinarySearch
+-methodMapping java.util.TimeZone.getTimeZone Haxen.Extensions.GetTimeZone
+-methodMapping java.lang.Throwable.initCause Haxen.Extensions.InitCause
+-methodMapping java.lang.Character.isSpaceChar System.Char.IsWhiteSpace
+-methodMapping java.lang.Character.isLowerCase System.Char.IsLower
+-methodMapping java.lang.Character.isUpperCase System.Char.IsUpper
+-methodMapping java.lang.Character.toLowerCase System.Char.ToLower
+-methodMapping java.lang.Character.toUpperCase System.Char.ToUpper
+-methodMapping java.util.HashMap<,>.containsKey ContainsKey
+-methodMapping java.lang.System.gc System.GC.Collect
+-methodMapping java.lang.System.runFinalization System.GC.WaitForPendingFinalizers
+-methodMapping java.lang.System.getenv(String) System.Environment.GetEnvironmentVariable
+-methodMapping java.lang.System.getenv() Haxen.Runtime.GetEnv
+-methodMapping java.net.InetAddress.getLocalHost Haxen.Runtime.GetLocalHost
+-methodMapping java.net.InetAddress.getCanonicalHostName ToString
+-methodMapping java.util.Locale.Locale(String,String,String) Haxen.Extensions.CreateLocale
+-methodMapping java.util.zip.Deflater.end Finish
+-methodMapping java.util.zip.Inflater.end Finish
+-methodMapping java.io.PrintWriter.print Write
+-methodMapping java.io.PrintWriter.println WriteLine
+-methodMapping java.lang.ArrayIndexOutOfBoundsException.ArrayIndexOutOfBoundsException(int) Haxen.Extensions.CreateIndexOutOfRangeException
+-methodMapping java.lang.Appendable.append(java.lang.CharSequence,int,int) AppendRange
+-methodMapping java.util.Date.Date(long) Haxen.Extensions.CreateDate
+-methodMapping java.lang.Long.signum Haxen.Extensions.Signum
+-methodMapping java.util.Collection.add AddItem
+-methodMapping java.util.ArrayList.removeElement Remove
+-methodMapping java.net.InetAddress.getByName Haxen.Extensions.GetAddressByName
+-methodMapping java.net.ServerSocket.ServerSocket Haxen.Extensions.CreateServerSocket
+-methodMapping java.net.Socket.Socket Haxen.Extensions.CreateSocket
+-methodMapping java.net.Socket.bind Bind2
+-methodMapping java.net.InetAddress.getAddress GetAddressBytes
+-methodMapping java.math.BigInteger.toByteArray GetBytes
+-methodMapping java.util.Vector.remove RemoveElement
+-methodMapping java.util.concurrent.Semaphore.Semaphore Haxen.Extensions.CreateSemaphore
+-methodMapping java.util.concurrent.Semaphore.acquire WaitOne
+-methodMapping java.lang.ProcessBuilder.command SetCommand
+-methodMapping java.io.IOException.IOException(java.lang.Throwable) Haxen.Extensions.CreateIOException
+-typeMapping java.lang.Comparable System.IComparable
+-typeMapping java.util.Comparator<> System.Collections.Generic.IComparer
+-typeMapping java.util.HashSet<> System.Collections.Generic.HashSet
+-typeMapping java.util.HashSet<> System.Collections.Generic.HashSet
+-typeMapping java.io.File Haxen.FilePath
+-typeMapping java.lang.StringBuilder System.Text.StringBuilder
+-typeMapping java.nio.charset.Charset System.Text.Encoding
+-typeMapping java.util.Locale System.Globalization.CultureInfo
+-typeMapping java.io.Closeable System.IDisposable
+-typeMapping java.lang.Error Haxen.Error
+-typeMapping java.lang.NumberFormatException System.FormatException
+-typeMapping java.util.Collections Haxen.Collections
+-typeMapping java.util.LinkedList<> System.Collections.Generic.List
+-typeMapping java.net.URL System.Uri
+-typeMapping java.lang.IndexOutOfRangeException Haxen.IndexOutOfRangeException
+-typeMapping java.lang.Process Haxen.SystemProcess
+-typeMapping java.net.InetAddress System.Net.IPAddress
+-typeMapping java.util.TimeZone System.TimeZoneInfo
+-typeMapping java.util.ArrayList<> Haxen.AList
+-typeMapping java.util.zip.Inflater ICSharpCode.SharpZipLib.Zip.Compression.Inflater
+-typeMapping java.util.zip.Deflater ICSharpCode.SharpZipLib.Zip.Compression.Deflater
+-typeMapping java.util.zip.ZipException ICSharpCode.SharpZipLib.SharpZipBaseException
+-typeMapping java.util.zip.DataFormatException ICSharpCode.SharpZipLib.SharpZipBaseException
+-typeMapping java.io.FileNotFoundException System.IO.FileNotFoundException
+-typeMapping java.io.Reader System.IO.StreamReader
+-typeMapping java.util.SortedSet<> System.Collections.Generic.ICollection
+-typeMapping java.lang.AssertionError System.Exception
+-typeMapping java.io.InterruptedIOException System.Threading.ThreadInterruptedException
+-typeMapping java.lang.RuntimeException Haxen.RuntimeException
+-typeMapping java.net.MalformedURLException System.UriFormatException
+-typeMapping java.lang.Package System.Reflection.Assembly
+-typeMapping java.net.InetSocketAddress System.Net.IPEndPoint
+-typeMapping java.net.SocketAddress System.Net.EndPoint
+-typeMapping java.net.Socket System.Net.Sockets.Socket
+-typeMapping java.net.ServerSocket System.Net.Sockets.Socket
+-typeMapping java.math.BigInteger Mono.Math.BigInteger
+-typeMapping java.util.Properties Haxen.Properties
+-typeMapping java.util.concurrent.Semaphore System.Threading.Semaphore
+-typeMapping java.util.Enumeration System.Collections.Generic.IEnumeration
+-typeMapping java.lang.ProcessBuilder System.Diagnostics.ProcessStartInfo
+-propertyMapping java.lang.Class.getSimpleName Name
+-propertyMapping java.nio.charset.Charset.defaultCharset Default
+-propertyMapping java.util.Locale.getDefault CurrentCulture
+-propertyMapping java.util.Locale.setDefault System.Threading.Thread.CurrentThread.CurrentCulture
+-propertyMapping java.net.URL.getProtocol Scheme
+-propertyMapping java.net.URL.getPort Port
+-propertyMapping java.net.URL.getPath AbsolutePath
+-propertyMapping java.util.TimeZone.getDefault System.TimeZoneInfo.Local
+-propertyMapping java.util.zip.Deflater.finished IsFinished
+-propertyMapping java.util.zip.Deflater.needsInput IsNeedingInput
+-propertyMapping java.util.zip.Inflater.finished IsFinished
+-propertyMapping java.util.zip.Inflater.needsInput IsNeedingInput
+-propertyMapping java.util.zip.Inflater.getBytesRead TotalIn
+-propertyMapping java.util.zip.Inflater.getRemaining RemainingInput
+-propertyMapping java.lang.reflect.Field.getType FieldType
+-propertyMapping java.lang.Class.getPackage Assembly
+-propertyMapping java.net.InetSocketAddress.getAddress Address
+-propertyMapping java.net.InetSocketAddress.getPort Port
+-propertyMapping java.net.Socket.getRemoteSocketAddress RemoteEndPoint
+-propertyMapping java.net.ServerSocket.getLocalSocketAddress LocalEndPoint
+-propertyMapping java.net.Socket.setSoTimeout ReceiveTimeout
+-propertyMapping java.net.Socket.getSoTimeout ReceiveTimeout
+-propertyMapping java.net.Socket.setTcpNoDelay NoDelay
+-propertyMapping java.net.Socket.isConnected Connected
+-propertyMapping java.lang.ProcessBuilder.environment EnvironmentVariables
+-propertyMapping java.lang.ProcessBuilder.directory WorkingDirectory
+-fullyQualify Thread
+-fullyQualify Pattern
+-fullyQualify SocketAddress
+-fullyQualify Cipher
+-fullyQualify DH
+-fullyQualify KeyPairGenDSA
+-fullyQualify KeyPairGenRSA
+-fullyQualify SignatureDSA
+-fullyQualify SignatureRSA
+-fullyQualify KeyPair
+-fullyQualify GSSContext
+-fullyQualify Test
