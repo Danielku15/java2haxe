@@ -1,0 +1,49 @@
+<project name="">
+
+	<property name="eclipse.home" location="D:\dev\tools\eclipse\" />
+
+	<macrodef name="sharpen">
+		<attribute name="directory" />
+		<attribute name="project" />
+		<attribute name="sources" />
+		<attribute name="options" />
+		<attribute name="outdir" />
+		<attribute name="header" />
+		<sequential>
+			<delete dir="@{directory}/build" />
+			<mkdir dir="@{directory}/build/@{project}" />
+			<copy todir="@{directory}/build/@{project}/@{sources}">
+				<fileset dir="@{directory}/@{sources}" includes="**" />
+			</copy>
+			<java fork="true" classname="org.eclipse.core.launcher.Main" failonerror="true">
+				<jvmarg value="-Xms256m" />
+				<jvmarg value="-Xmx512m" />
+				<sysproperty key="eclipse.consoleLog" value="true" />
+				<classpath>
+					<fileset dir="${eclipse.home}/plugins">
+						<include name="**/org.eclipse.equinox.launcher_*.jar" />
+					</fileset>
+				</classpath>
+				<arg value="-consoleLog" />
+				<arg value="-data" />
+				<arg file="@{directory}/build/" />
+				<arg value="-application" />
+				<arg value="sharpen.core.application" />
+				<arg value="@{project}/@{sources}" />
+				<arg value="@@${user.dir}/@{options}" />
+				<arg value="-header" />
+				<arg value="${user.dir}/@{header}" />
+			</java>
+			<mkdir dir="@{outdir}"/>
+			<copy todir="@{outdir}">
+				<fileset dir="@{directory}/build/@{project}.haxe/@{sources}" includes="**" />
+			</copy>
+			<delete dir="@{directory}/build" />
+		</sequential>
+	</macrodef>
+	
+	<target name="convert">
+		<echo message="Generating code for sharpen.haxe.test" />
+		<sharpen directory="${user.dir}" project="sharpen.haxe.test" sources="src" options="sharpen-options" outdir="${user.dir}/generated" header="test.header" />
+	</target>
+</project>

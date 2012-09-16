@@ -644,7 +644,7 @@ public class CSharpBuilder extends ASTVisitor {
 	}
 
 	private void setCompilationUnitElementName(String name) {
-		_compilationUnit.elementName(name + ".cs");
+		_compilationUnit.elementName(name + ".hx");
 	}
 
 	private String processInterfaceName(TypeDeclaration node) {

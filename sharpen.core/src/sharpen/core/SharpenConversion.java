@@ -29,6 +29,7 @@ import java.util.Map;
 import sharpen.core.csharp.CSharpPrinter;
 import sharpen.core.csharp.ast.CSCompilationUnit;
 import sharpen.core.framework.*;
+import sharpen.core.haxe.HaxePrinter;
 
 import org.eclipse.core.resources.IMarker;
 import org.eclipse.core.resources.IResource;
@@ -39,7 +40,7 @@ import org.eclipse.jdt.core.dom.*;
 
 public class SharpenConversion {
 
-	private CSharpPrinter _printer;
+	private HaxePrinter _printer;
 	protected ICompilationUnit _source;
 	protected Writer _writer;
 	protected final Configuration _configuration;
@@ -65,13 +66,13 @@ public class SharpenConversion {
 		return _writer;
 	}
 
-	public void setPrinter(CSharpPrinter printer) {
+	public void setPrinter(HaxePrinter printer) {
 		_printer = printer;
 	}
 
-	private CSharpPrinter getPrinter() {
+	private HaxePrinter getPrinter() {
 		if (null == _printer) {
-			_printer = new CSharpPrinter();
+			_printer = new HaxePrinter();
 		}
 		return _printer;
 	}
@@ -94,7 +95,7 @@ public class SharpenConversion {
 	}
 
 	private void printTree(CSCompilationUnit unit) {
-		CSharpPrinter printer = getPrinter();
+		HaxePrinter printer = getPrinter();
 		printer.setWriter(_writer);
 		printer.print(unit);
 	}

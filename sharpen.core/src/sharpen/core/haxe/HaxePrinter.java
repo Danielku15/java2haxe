@@ -110,6 +110,7 @@ public class HaxePrinter extends CSVisitor {
 
 		if (null != node.namespace()) {
 			writeLine("package " + node.namespace() + ";");
+			writeLine();
 		}
 		
 		List<CSUsing> usings = printableUsingList(node.usings());
@@ -227,7 +228,7 @@ public class HaxePrinter extends CSVisitor {
 
 	private void writeMemberHeader(CSTypeDeclaration node) {
 		writeAttributes(node);
-		writeVisibility(node);
+		// writeVisibility(node);
 	}
 
 	private void writeTypeParameters(CSTypeParameterProvider node) {

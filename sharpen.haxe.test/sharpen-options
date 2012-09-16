@@ -1,0 +1,23 @@
+-nativeTypeSystem
+-organizeUsings
+
+-typeMapping boolean Bool
+-typeMapping void Void
+-typeMapping char Char
+-typeMapping byte Byte
+-typeMapping short Short
+-typeMapping int Int
+-typeMapping long Long
+-typeMapping float Float
+-typeMapping double Float
+
+-typeMapping java.lang.Object dynamic
+-typeMapping java.lang.String String
+-typeMapping java.lang.Character Char
+-typeMapping java.lang.Byte Byte
+-typeMapping java.lang.Boolean Bool
+-typeMapping java.lang.Short Short
+-typeMapping java.lang.Integer Int
+-typeMapping java.lang.Long Long
+-typeMapping java.lang.Float Float
+-typeMapping java.lang.Double Double
