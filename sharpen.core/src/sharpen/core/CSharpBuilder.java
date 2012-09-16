@@ -3499,10 +3499,6 @@ public class CSharpBuilder extends ASTVisitor {
 						: modifier;
 	}
 	
-	private boolean isExtractedNestedType (ITypeBinding type) {
-		return _configuration.typeHasMapping(BindingUtils.typeMappingKey(type));
-	}
-
 	private boolean isOverride(MethodDeclaration method) {
 		return null != getOverridedMethod (method);
 	}
@@ -3531,10 +3527,6 @@ public class CSharpBuilder extends ASTVisitor {
 			return false;
 		if (type.getDeclaredFields().length != 0)
 			return false;
-		for (ITypeBinding ntype : type.getDeclaredTypes()) {
-			if (!isExtractedNestedType(ntype))
-				return false;
-		}
 		return true;
 	}
 

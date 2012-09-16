@@ -48,6 +48,14 @@ public class MappingsImpl implements Mappings {
 			if (annotatedRenaming != null) {
 				return registerMappedType(type, fullyQualifyIfNeeded(annotatedRenaming, type));
 			}
+			
+			if(type.isNested()) {
+				String fully = qualifiedName(type);
+				String namespace = namespace(namespace(fully));
+				String mappedNamespace = _configuration.mappedNamespace(namespace);
+				String name = fully.substring(fully.lastIndexOf('.'), fully.length());
+				return registerMappedType(type, mappedNamespace + "." + name);
+			}
 		}
 		
 		String mappedTypeName = mappedTypeName(BindingUtils.typeMappingKey(type), qualifiedName(type));
@@ -125,12 +133,15 @@ public class MappingsImpl implements Mappings {
 		if (keepFullyQualified(name))
 			return fullName;
 
-		if(!namespace.equals(_currentNamespace)) {
+		if(type.isNested()) {
+			
+		}
+		if(!type.getPackage().getName().equals(_currentNamespace)) {
 			_compilationUnit.addUsing(new CSUsing(fullName));
 		}
 		return name;
 	}
-
+	
 	private int nameSpaceLength(ITypeBinding type, String fullName, int pos) {
 		while (type.isNested()) {
 			pos = fullName.lastIndexOf(".", pos - 1);
@@ -159,6 +170,9 @@ public class MappingsImpl implements Mappings {
 	}
 
 	private boolean hasMapping(ITypeBinding type) {
+		if(type.isNested()) {
+			return true;
+		}
 		return _configuration.typeHasMapping(BindingUtils.typeMappingKey(type));
 	}
 	
