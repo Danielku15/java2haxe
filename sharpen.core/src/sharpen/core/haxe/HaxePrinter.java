@@ -165,6 +165,11 @@ public class HaxePrinter extends CSVisitor {
 
 	public void visit(CSTypeParameter node) {
 		write(node.name());
+		if(node.superClass() != null) {
+			write(" : (");
+			node.superClass().accept(this);
+			write(")");
+		}
 	}
 	
 	@Override
@@ -230,17 +235,6 @@ public class HaxePrinter extends CSVisitor {
 		if (parameters.isEmpty()) return;
 		writeGenericParameters(parameters);
 	}
-
-//	private void writeTypeParameterConstraints(List<CSTypeParameter> parameters) {
-//		if (parameters.isEmpty()) return;
-//		for (CSTypeParameter tp : parameters) {
-//			if (tp.superClass() != null) {
-//				write (" where ");
-//				write (tp.name() + ":");
-//				tp.superClass().accept(this);
-//			}
-//		}
-//	}
 
 	private <T extends CSNode> void writeGenericParameters(Iterable<T> nodes) {
 		write("<");
@@ -371,9 +365,6 @@ public class HaxePrinter extends CSVisitor {
 		writeMethodName(node);
 		writeTypeParameters(node);
 		writeParameterList(node);
-		// TODO: type parameter constraints
-//		if (node.modifier() != CSMethodModifier.Override)
-//			writeTypeParameterConstraints (node.typeParameters());
 		if (node.isAbstract()) {
 			writeLine(";");
 		} else {
