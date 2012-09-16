@@ -1810,21 +1810,21 @@ public class CSharpBuilder extends ASTVisitor {
 	}
 
 	public boolean visit(ConstructorInvocation node) {
-		addChainedConstructorInvocation(new CSThisExpression(), node.arguments());
+		addChainedConstructorInvocation(new CSThisExpression(), node.arguments(), node.getStartPosition());
 		return false;
 	}
 
-	private void addChainedConstructorInvocation(CSExpression target, List arguments) {
+	private void addChainedConstructorInvocation(CSExpression target, List arguments, int startPosition) {
 		CSConstructorInvocationExpression cie = new CSConstructorInvocationExpression(target);
 		mapArguments(cie, arguments);
-		((CSConstructor) _currentMethod).chainedConstructorInvocation(cie);
+		addStatement(new CSExpressionStatement(startPosition, cie));
 	}
 
 	public boolean visit(SuperConstructorInvocation node) {
 		if (null != node.getExpression()) {
 			notImplemented(node);
 		}
-		addChainedConstructorInvocation(new CSBaseExpression(), node.arguments());
+		addChainedConstructorInvocation(new CSBaseExpression(), node.arguments(), node.getStartPosition());
 		return false;
 	}
 
