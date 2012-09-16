@@ -246,7 +246,7 @@ public class MappingsImpl implements Mappings {
 	
 	private String computeMethodName(IMethodBinding binding, Configuration.MemberMapping mapping) {
 		if (isStaticVoidMain(binding))
-			return "Main";
+			return "main";
 		String name = isNameMapping(mapping)
 			? mapping.name
 			: binding.getName();

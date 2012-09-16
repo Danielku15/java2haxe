@@ -83,7 +83,7 @@ public class SharpenConversionBatch extends ConversionBatch {
 	private void saveConvertedFile(ICompilationUnit cu, CSCompilationUnit csModule, StringWriter convertedContents) throws JavaModelException, CoreException, UnsupportedEncodingException {
 		String newName = csModule.elementName();
 		if (newName == null) {
-			newName = getNameWithoutExtension(cu.getElementName()) + ".cs";
+			newName = getNameWithoutExtension(cu.getElementName()) + ".hx";
 		}
 
 		IFolder folder = targetFolderForCompilationUnit(cu, csModule.namespace());
