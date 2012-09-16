@@ -759,11 +759,7 @@ public class CSharpBuilder extends ASTVisitor {
     }
 
 	private void addType(ITypeBinding binding, CSType type) {
-		if (null != _currentType && !isExtractedNestedType(binding)) {
-			_currentType.addMember(type);
-		} else {
-			_compilationUnit.addType(type);
-		}
+		_compilationUnit.addType(type);
 	}
 
 	private void mapDocumentation(final BodyDeclaration bodyDecl, final CSMember member) {
