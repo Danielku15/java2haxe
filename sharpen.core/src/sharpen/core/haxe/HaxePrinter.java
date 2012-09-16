@@ -37,7 +37,7 @@ public class HaxePrinter extends CSVisitor {
 
 	public HaxePrinter() {
 	}
-	
+
 	public void setWriter(Writer writer) {
 		_writer = new IndentedWriter(writer);
 	}
@@ -52,7 +52,7 @@ public class HaxePrinter extends CSVisitor {
 			_comments = null;
 		}
 	}
-	
+
 	private List<CSUsing> printableUsingList(Iterable<CSUsing> usings) {
 		List<CSUsing> list = new ArrayList<CSUsing>();
 		for (CSUsing using : usings) {
@@ -62,28 +62,32 @@ public class HaxePrinter extends CSVisitor {
 			public int compare(CSUsing a, CSUsing b) {
 				boolean ia = a.namespace().startsWith("System");
 				boolean ib = b.namespace().startsWith("System");
-				
-				if (ia && ib) return a.namespace().compareTo(b.namespace());
-				else if (ia) return -1;
-				else if (ib) return 1;
-				else return a.namespace().compareTo(b.namespace()); 
+
+				if (ia && ib)
+					return a.namespace().compareTo(b.namespace());
+				else if (ia)
+					return -1;
+				else if (ib)
+					return 1;
+				else
+					return a.namespace().compareTo(b.namespace());
 			}
 		});
 		return list;
 	}
 
 	static final Pattern META_VARIABLE_PATTERN = Pattern.compile("\\$(\\w+)");
-	
+
 	@Override
 	public void visit(CSMacroExpression node) {
 		node.macro().accept(this);
 	}
-	
+
 	@Override
 	public void visit(CSMacroTypeReference node) {
 		node.macro().accept(this);
-    }
-	
+	}
+
 	@Override
 	public void visit(CSMacro node) {
 		final String template = node.template();
@@ -91,15 +95,15 @@ public class HaxePrinter extends CSVisitor {
 		int last = 0;
 		while (matcher.find()) {
 			write(template.substring(last, matcher.start()));
-			
+
 			Object value = node.resolveVariable(matcher.group(1));
 			// value is either a single node or a list of nodes
 			if (value instanceof CSNode) {
-				((CSNode)value).accept(this);
+				((CSNode) value).accept(this);
 			} else {
 				writeCommaSeparatedList((Iterable<CSNode>) value);
 			}
-			
+
 			last = matcher.end();
 		}
 		write(template.substring(last));
@@ -112,32 +116,33 @@ public class HaxePrinter extends CSVisitor {
 			writeLine("package " + node.namespace() + ";");
 			writeLine();
 		}
-		
+
 		List<CSUsing> usings = printableUsingList(node.usings());
 		for (CSUsing using : usings) {
 			using.accept(this);
 		}
-		
-		if (usings.size() > 0) _writer.writeLine();
 
+		if (usings.size() > 0)
+			_writer.writeLine();
 
 		writeLineSeparatedList(node.types());
 		endEnclosingIfDefs(node);
 	}
-	
+
 	@Override
 	public void visit(CSRemovedExpression node) {
-	    throw new IllegalStateException("Unexpected removal of expression: " + node.toString());
+		throw new IllegalStateException("Unexpected removal of expression: "
+				+ node.toString());
 	}
 
 	public void visit(CSUsing node) {
 		writeLine("import " + node.namespace() + ";");
 	}
-	
+
 	public void visit(CSClass node) {
 		writeType(node);
 	}
-	
+
 	public void visit(CSEnum node) {
 		writeMemberHeader(node);
 		writeLine("enum " + node.name());
@@ -150,40 +155,40 @@ public class HaxePrinter extends CSVisitor {
 		writeLine();
 		leaveBody();
 	}
-	
+
 	@Override
 	public void visit(CSEnumValue node) {
 		writeIndented(node.name());
 	}
-	
+
 	public void visit(CSStruct node) {
 		writeType(node);
 	}
-	
+
 	public void visit(CSInterface node) {
 		writeType(node);
 	}
 
 	public void visit(CSTypeParameter node) {
 		write(node.name());
-		if(node.superClass() != null) {
+		if (node.superClass() != null) {
 			write(" : (");
 			node.superClass().accept(this);
 			write(")");
 		}
 	}
-	
+
 	@Override
 	public void visit(final CSArrayTypeReference node) {
-	    for (int i = 0; i < node.dimensions(); ++i) {
-	        write("Array<");
-	    }
-	    node.elementType().accept(this);
-	    for (int i = 0; i < node.dimensions(); ++i) {
-	        write(">");
-	    }
+		for (int i = 0; i < node.dimensions(); ++i) {
+			write("Array<");
+		}
+		node.elementType().accept(this);
+		for (int i = 0; i < node.dimensions(); ++i) {
+			write(">");
+		}
 	}
-	
+
 	public void visit(CSTypeReference node) {
 		write(node.typeName());
 		writeTypeArguments(node);
@@ -195,29 +200,31 @@ public class HaxePrinter extends CSVisitor {
 			writeGenericParameters(typeArgs);
 		}
 	}
-	
+
 	public void visit(CSDelegate node) {
-	    writeMemberHeader(node);
-	    write("typedef ");
-	    write(node.name());
-	    write(" = ");
-	    for (CSVariableDeclaration parameter : node.parameters()) {
-	        parameter.type().accept(this);
-	        write("->");
-	    }
-	    write("Void");
-	    writeLine(";");		
+		writeMemberHeader(node);
+		write("typedef ");
+		write(node.name());
+		write(" = ");
+		for (CSVariableDeclaration parameter : node.parameters()) {
+			parameter.type().accept(this);
+			write("->");
+		}
+		write("Void");
+		writeLine(";");
 	}
 
 	private void writeTypeHeader(CSTypeDeclaration node) {
-		writeMemberHeader(node);		
+		writeMemberHeader(node);
 		if (node.isInterface()) {
-			if (node.partial()) _writer.write("/*partial*/ ");
+			if (node.partial())
+				_writer.write("/*partial*/ ");
 			write("interface " + node.name());
 		} else if (node instanceof CSClass) {
-			CSClass classNode = (CSClass)node;
+			CSClass classNode = (CSClass) node;
 			write(classModifier(classNode.modifier()));
-			if (node.partial()) _writer.write("/*partial*/ ");
+			if (node.partial())
+				_writer.write("/*partial*/ ");
 			write("class " + node.name());
 		} else {
 			write("/*struct*/ " + node.name());
@@ -233,7 +240,8 @@ public class HaxePrinter extends CSVisitor {
 
 	private void writeTypeParameters(CSTypeParameterProvider node) {
 		final List<CSTypeParameter> parameters = node.typeParameters();
-		if (parameters.isEmpty()) return;
+		if (parameters.isEmpty())
+			return;
 		writeGenericParameters(parameters);
 	}
 
@@ -250,27 +258,27 @@ public class HaxePrinter extends CSVisitor {
 		writeTypeBody(node);
 		endEnclosingIfDefs(node);
 	}
-	
+
 	private void writeBaseTypes(CSTypeDeclaration node) {
-	    List<CSTypeReferenceExpression> baseTypes = node.baseTypes();
-	    if (baseTypes.isEmpty()) {
-	        return;
-	    }
+		List<CSTypeReferenceExpression> baseTypes = node.baseTypes();
+		if (baseTypes.isEmpty()) {
+			return;
+		}
 
-	    String keyword = node.isInterface() ? " implements" : " extends";
-	    for (int i = 0; i < baseTypes.size(); i++) {
-	        CSTypeReferenceExpression baseType = baseTypes.get(i);
-	        if (i > 0) {
-	            write(",");
-	        }
+		String keyword = node.isInterface() ? " implements" : " extends";
+		for (int i = 0; i < baseTypes.size(); i++) {
+			CSTypeReferenceExpression baseType = baseTypes.get(i);
+			if (i > 0) {
+				write(",");
+			}
 
-	        write(keyword);
-	        write(" ");
-	        baseType.accept(this);
-	        if (i == 0) {
-	            keyword = "implements";
-	        }
-	    }
+			write(keyword);
+			write(" ");
+			baseType.accept(this);
+			if (i == 0) {
+				keyword = "implements";
+			}
+		}
 	}
 
 	private void writeTypeBody(CSTypeDeclaration node) {
@@ -286,26 +294,27 @@ public class HaxePrinter extends CSVisitor {
 
 	private void writeVisibility(CSMember member) {
 		writeIndentation();
-		
+
 		if (member.isNewModifier())
 			write("/*new*/ ");
-		
-		if (isExplicitMember(member)) return;
-		
+
+		if (isExplicitMember(member))
+			return;
+
 		CSVisibility visibility = member.visibility();
 		switch (visibility) {
-			case Internal:
-				write("public");
-				break;
-			case Private:
-				write("private");
-				break;
-			case Protected:
-				write("private");
-				break;
-			case Public:
-				write("public");
-				break;
+		case Internal:
+			write("public");
+			break;
+		case Private:
+			write("private");
+			break;
+		case Protected:
+			write("private");
+			break;
+		case Public:
+			write("public");
+			break;
 		}
 		write(" ");
 	}
@@ -313,69 +322,69 @@ public class HaxePrinter extends CSVisitor {
 	private boolean isExplicitMember(CSMember member) {
 		return member.name().indexOf('.') != -1;
 	}
-	
+
 	public void visit(CSVariableDeclaration node) {
-		if(!node.parameter()) {
-			write("var "); 
+		if (!node.parameter()) {
+			write("var ");
 		}
 		if (null != node.name()) {
-		    write(node.name());
+			write(node.name());
 		}
 		write(" : ");
 		node.type().accept(this);
 		if (null != node.initializer()) {
-		    write(" = ");
-		    node.initializer().accept(this);
+			write(" = ");
+			node.initializer().accept(this);
 		}
 	}
-	
-	public void visit(CSConstructor node) {
-	    writeDoc(node);
-	    writeAttributes(node);
-	    if (node.isStatic()) {
-	        writeIndented("static var __init = (function()");
-	        writeLine();
-	        node.body().accept(this);
-	        writeIndented(")();");
-	    } else {
-	        writeVisibility(node);
-	        write("function new");
-	        writeParameterList(node);
-	        // TODO: generate this in body block
-	        /*
-	         * if (null != node.chainedConstructorInvocation()) { write(" : ");
-	         * writeMethodInvocation(node.chainedConstructorInvocation()); }
-	         */
-	        writeLine();
-	        node.body().accept(this);
-	    }
-	}
-	
-	public void visit(CSDestructor node) {
-	    // TODO: compiler warning for unsupported destructors
-	}
-	
-	public void visit(CSMethod node) {
-	    printPrecedingComments(node);
-	    beginEnclosingIfDefs(node);
-	    writeDoc(node);
-	    writeAttributes(node);
-	    writeMethodHeader(node, node.modifier());
-	    write("function ");
-	    writeMethodName(node);
-	    writeTypeParameters(node);
-	    writeParameterList(node);
-	    write(" : ");
-	    node.returnType().accept(this);
 
-	    if(_currentType instanceof CSInterface) {
-	    	writeLine(";");
-	    } else if (node.isAbstract()) {
-	        writeLine("{ throw \"abstract\"; }");
-	    } else {
-	        writeMethodBody(node);
-	    }
-	    endEnclosingIfDefs(node);
+	public void visit(CSConstructor node) {
+		writeDoc(node);
+		writeAttributes(node);
+		if (node.isStatic()) {
+			writeIndented("static var __init = (function()");
+			writeLine();
+			node.body().accept(this);
+			writeIndented(")();");
+		} else {
+			writeVisibility(node);
+			write("function new");
+			writeParameterList(node);
+			// TODO: generate this in body block
+			/*
+			 * if (null != node.chainedConstructorInvocation()) { write(" : ");
+			 * writeMethodInvocation(node.chainedConstructorInvocation()); }
+			 */
+			writeLine();
+			node.body().accept(this);
+		}
+	}
+
+	public void visit(CSDestructor node) {
+		// TODO: compiler warning for unsupported destructors
+	}
+
+	public void visit(CSMethod node) {
+		printPrecedingComments(node);
+		beginEnclosingIfDefs(node);
+		writeDoc(node);
+		writeAttributes(node);
+		writeMethodHeader(node, node.modifier());
+		write("function ");
+		writeMethodName(node);
+		writeTypeParameters(node);
+		writeParameterList(node);
+		write(" : ");
+		node.returnType().accept(this);
+
+		if (_currentType instanceof CSInterface) {
+			writeLine(";");
+		} else if (node.isAbstract()) {
+			writeLine("{ throw \"abstract\"; }");
+		} else {
+			writeMethodBody(node);
+		}
+		endEnclosingIfDefs(node);
 	}
 
 	private void endEnclosingIfDefs(CSNode node) {
@@ -409,47 +418,48 @@ public class HaxePrinter extends CSVisitor {
 	protected void writeMethodName(CSMethod node) {
 		write(node.name());
 	}
-	
+
 	public void visit(CSBlock node) {
 		enterBody();
 		visitList(node.statements());
 		leaveBody();
 	}
-	
-	public void visit(CSDeclarationStatement node) {		
+
+	public void visit(CSDeclarationStatement node) {
 		printPrecedingComments(node);
-		
+
 		writeIndentation();
 		node.declaration().accept(this);
-		writeLine(";");	
-		
+		writeLine(";");
+
 	}
-	
+
 	public void visit(CSDeclarationExpression node) {
 		node.declaration().accept(this);
 	}
 
-	private void writeDeclaration(CSTypeReferenceExpression type, String name, CSExpression initializer) {
-	    write("var ");
-	    write(name);
-	    write(" : ");
-	    type.accept(this);
-	    if (null != initializer) {
-	        write(" = ");
-	        initializer.accept(this);
-	    }
-	    writeLine(";");
+	private void writeDeclaration(CSTypeReferenceExpression type, String name,
+			CSExpression initializer) {
+		write("var ");
+		write(name);
+		write(" : ");
+		type.accept(this);
+		if (null != initializer) {
+			write(" = ");
+			initializer.accept(this);
+		}
+		writeLine(";");
 	}
-	
+
 	@Override
 	public void visit(CSLineComment node) {
 		writeIndentedLine(node.text());
 	}
-	
+
 	public void visit(CSReturnStatement node) {
-		
+
 		printPrecedingComments(node);
-		
+
 		if (null == node.expression()) {
 			writeIndentedLine("return;");
 		} else {
@@ -462,14 +472,17 @@ public class HaxePrinter extends CSVisitor {
 	private void printPrecedingComments(CSNode node) {
 		printPrecedingComments(node.startPosition());
 	}
-	
+
 	private void printPrecedingComments(int startPosition) {
-		if (startPosition <= 0) return;
-		if (_lastPrintedCommentIndex >= _comments.size()) return;
-		_lastPrintedCommentIndex = printCommentsBetween(_lastPrintedCommentIndex, startPosition);
+		if (startPosition <= 0)
+			return;
+		if (_lastPrintedCommentIndex >= _comments.size())
+			return;
+		_lastPrintedCommentIndex = printCommentsBetween(
+				_lastPrintedCommentIndex, startPosition);
 	}
 
-	private int printCommentsBetween(int lastIndex, int endStartPosition) {		
+	private int printCommentsBetween(int lastIndex, int endStartPosition) {
 		int endIndex = commentIndexAfter(lastIndex, endStartPosition);
 		if (endIndex == -1) {
 			endIndex = _comments.size();
@@ -479,7 +492,7 @@ public class HaxePrinter extends CSVisitor {
 	}
 
 	private int commentIndexAfter(int startIndex, int endStartPosition) {
-		for (int i=startIndex; i<_comments.size(); ++i) {
+		for (int i = startIndex; i < _comments.size(); ++i) {
 			if (_comments.get(i).startPosition() > endStartPosition) {
 				return i;
 			}
@@ -489,7 +502,7 @@ public class HaxePrinter extends CSVisitor {
 
 	public void visit(CSIfStatement node) {
 		printPrecedingComments(node);
-		
+
 		writeIndented("if (");
 		node.expression().accept(this);
 		writeLine(")");
@@ -499,16 +512,16 @@ public class HaxePrinter extends CSVisitor {
 			node.falseBlock().accept(this);
 		}
 	}
-	
+
 	public void visit(CSLockStatement node) {
-	    // TODO: compiler warning for lock statement
+		// TODO: compiler warning for lock statement
 		node.body().accept(this);
 	}
-	
+
 	public void visit(CSWhileStatement node) {
 		writeBlockStatement("while", node);
-	} 
-	
+	}
+
 	public void visit(CSSwitchStatement node) {
 		writeIndented("switch (");
 		node.expression().accept(this);
@@ -517,31 +530,31 @@ public class HaxePrinter extends CSVisitor {
 		writeLineSeparatedList(node.caseClauses());
 		leaveBody();
 	}
-	
-	public void visit(CSCaseClause node) {
-	    int clauses = 0;
-	    writeIndented("case ");
-	    for (CSExpression e : node.expressions()) {
-	        if (clauses++ > 0) {
-	        write(", ");
-	        }
-	        e.accept(this);
-	    }
-	    write(":");
 
-	    if (node.isDefault()) {
-	        if (clauses > 0) {
-	        writeLine();
-	        }
-	        writeIndented("default:");
-	    }
-	    writeLine();
-	    node.body().accept(this);
+	public void visit(CSCaseClause node) {
+		int clauses = 0;
+		writeIndented("case ");
+		for (CSExpression e : node.expressions()) {
+			if (clauses++ > 0) {
+				write(", ");
+			}
+			e.accept(this);
+		}
+		write(":");
+
+		if (node.isDefault()) {
+			if (clauses > 0) {
+				writeLine();
+			}
+			writeIndented("default:");
+		}
+		writeLine();
+		node.body().accept(this);
 	}
-	
+
 	public void visit(CSForEachStatement node) {
 		printPrecedingComments(node);
-		
+
 		writeIndented("for (");
 		node.variable().accept(this);
 		write(" in ");
@@ -549,68 +562,67 @@ public class HaxePrinter extends CSVisitor {
 		writeLine(")");
 		node.body().accept(this);
 	}
-	
+
 	public void visit(CSForStatement node) {
-	    printPrecedingComments(node);
-	    /**
-	     * <code>
-	     * {
-	     *   <initializers>
-	     *   if( <condition> ) 
-	     *   do 
-	     *   {
-	     *      <body>
-	     *   } while( { <updaters>; <condition> });
-	     * </code>
-	     */
+		printPrecedingComments(node);
+		/**
+		 * <code>
+		 * {
+		 *   <initializers>
+		 *   if( <condition> ) 
+		 *   do 
+		 *   {
+		 *      <body>
+		 *   } while( { <updaters>; <condition> });
+		 * </code>
+		 */
 
-	    enterBody();
+		enterBody();
 
-	    for (CSExpression initializer : node.initializers()) {
-	        initializer.accept(this);
-	        writeLine(";");
-	    }
+		for (CSExpression initializer : node.initializers()) {
+			initializer.accept(this);
+			writeLine(";");
+		}
 
-	    if (null != node.expression()) {
-	        writeIndented("if (");
-	        node.expression().accept(this);
-	        writeLine(")");
-	    }
+		if (null != node.expression()) {
+			writeIndented("if (");
+			node.expression().accept(this);
+			writeLine(")");
+		}
 
-	    writeIndentedLine("do");
-	    node.body().accept(this);
-	    writeIndented("while ( {");
+		writeIndentedLine("do");
+		node.body().accept(this);
+		writeIndented("while ( {");
 
-	    for (CSExpression updater : node.updaters()) {
-	        updater.accept(this);
-	        write(";");
-	    }
+		for (CSExpression updater : node.updaters()) {
+			updater.accept(this);
+			write(";");
+		}
 
-	    if (null != node.expression()) {
-	        node.expression().accept(this);
-	    } else {
-	        write("true");
-	    }
-	    writeLine("} );");
+		if (null != node.expression()) {
+			node.expression().accept(this);
+		} else {
+			write("true");
+		}
+		writeLine("} );");
 	}
-	
+
 	public void visit(CSBreakStatement node) {
 		printPrecedingComments(node);
 		writeIndentedLine("break;");
 	}
-	
+
 	public void visit(CSGotoStatement node) {
 		printPrecedingComments(node);
 		if (node.target() != null) {
-			writeIndented ("/*goto case ");
+			writeIndented("/*goto case ");
 			node.target().accept(this);
-			write (";*/");
-			writeLine ();
-		}
-		else
+			write(";*/");
+			writeLine();
+		} else
 			writeIndentedLine("/*goto " + node.label() + ";*/");
 	}
-	
+
 	public void visit(CSContinueStatement node) {
 		printPrecedingComments(node);
 		writeIndentedLine("continue;");
@@ -625,7 +637,7 @@ public class HaxePrinter extends CSVisitor {
 		writeLine();
 		node.body().accept(this);
 	}
-	
+
 	public void visit(CSDoStatement node) {
 		writeIndentedLine("do");
 		node.body().accept(this);
@@ -633,10 +645,10 @@ public class HaxePrinter extends CSVisitor {
 		node.expression().accept(this);
 		writeLine(");");
 	}
-	
+
 	public void visit(CSTryStatement node) {
 		printPrecedingComments(node);
-		
+
 		writeIndentedLine("try");
 		node.body().accept(this);
 		visitList(node.catchClauses());
@@ -646,7 +658,7 @@ public class HaxePrinter extends CSVisitor {
 			node.finallyBlock().accept(this);
 		}
 	}
-	
+
 	public void visit(CSCatchClause node) {
 		writeIndented("catch");
 		CSVariableDeclaration ex = node.exception();
@@ -658,10 +670,10 @@ public class HaxePrinter extends CSVisitor {
 		writeLine();
 		node.body().accept(this);
 	}
-	
+
 	public void visit(CSThrowStatement node) {
 		printPrecedingComments(node);
-		
+
 		if (null == node.expression()) {
 			writeIndentedLine("throw;");
 		} else {
@@ -670,21 +682,21 @@ public class HaxePrinter extends CSVisitor {
 			writeLine(";");
 		}
 	}
-	
+
 	public void visit(CSExpressionStatement node) {
 		printPrecedingComments(node);
-		
+
 		writeIndentation();
 		node.expression().accept(this);
 		writeLine(";");
 	}
-	
+
 	public void visit(CSParenthesizedExpression node) {
 		write("(");
 		node.expression().accept(this);
 		write(")");
 	}
-	
+
 	public void visit(CSConditionalExpression node) {
 		node.expression().accept(this);
 		write(" ? ");
@@ -692,7 +704,7 @@ public class HaxePrinter extends CSVisitor {
 		write(" : ");
 		node.falseExpression().accept(this);
 	}
-	
+
 	public void visit(CSInfixExpression node) {
 		node.lhs().accept(this);
 		write(" ");
@@ -700,22 +712,22 @@ public class HaxePrinter extends CSVisitor {
 		write(" ");
 		node.rhs().accept(this);
 	}
-	
+
 	public void visit(CSPrefixExpression node) {
 		write(node.operator());
 		node.operand().accept(this);
 	}
-	
+
 	public void visit(CSPostfixExpression node) {
 		node.operand().accept(this);
 		write(node.operator());
 	}
-	
+
 	public void visit(CSConstructorInvocationExpression node) {
 		write("new ");
 		writeMethodInvocation(node);
 	}
-	
+
 	public void visit(CSMethodInvocationExpression node) {
 		writeMethodInvocation(node);
 	}
@@ -725,92 +737,94 @@ public class HaxePrinter extends CSVisitor {
 		writeTypeArguments(node);
 		writeParameterList(node.arguments());
 	}
-	
+
 	public void visit(CSNumberLiteralExpression node) {
 		write(node.token());
 	}
-	
+
 	public void visit(CSUncheckedExpression node) {
-		//write("unchecked(");
+		// write("unchecked(");
 		node.expression().accept(this);
-		//write(")");
+		// write(")");
 	}
-	
+
 	public void visit(CSTypeofExpression node) {
-		//write("typeof(");
+		// write("typeof(");
 		node.type().accept(this);
-		//write(")");
+		// write(")");
 	}
-	
+
 	public void visit(CSBoolLiteralExpression node) {
 		write(Boolean.toString(node.booleanValue()));
 	}
-	
+
 	public void visit(CSStringLiteralExpression node) {
 		write(node.escapedValue());
 	}
-	
+
 	public void visit(CSCharLiteralExpression node) {
 		write(node.escapedValue());
 	}
-	
+
 	public void visit(CSNullLiteralExpression node) {
 		write("null");
 	}
-	
+
 	public void visit(CSBaseExpression node) {
 		write("super");
 	}
-	
+
 	public void visit(CSThisExpression node) {
 		write("this");
 	}
-	
+
 	public void visit(CSArrayCreationExpression node) {
 		if (node.initializer() != null) {
 			write("ArrayUtils.CreateAndInit");
 		} else {
-		    write("ArrayUtils.Create");
+			write("ArrayUtils.Create");
 		}
-		
+
 		// HACK: predetect if multidimensional array and add indicator
 		if (node.elementType() instanceof CSArrayTypeReference) {
-		    CSArrayTypeReference csArrayTypeReference = (CSArrayTypeReference) node
-		        .elementType();
-		    write(Integer.toString(csArrayTypeReference.dimensions()));
+			CSArrayTypeReference csArrayTypeReference = (CSArrayTypeReference) node
+					.elementType();
+			write(Integer.toString(csArrayTypeReference.dimensions()));
 		}
-		
+
 		write("<");
 		node.elementType().accept(this);
 		write(">(");
-		
+
 		if (null != node.length()) {
-		    node.length().accept(this);
+			node.length().accept(this);
 		} else {
-		    write("-1");
+			write("-1");
 		}
-		
+
 		if (null != node.initializer()) {
-		    write(", ");
-		    node.initializer().accept(this);
+			write(", ");
+			node.initializer().accept(this);
 		}
-		
-		write(")");		
+
+		write(")");
 	}
-	
+
 	public void visit(CSArrayInitializerExpression node) {
 		write("[ ");
 		writeCommaSeparatedList(filterRemovedExpressions(node.expressions()));
 		write(" ]");
 	}
-	
-	private Iterable<CSNode> filterRemovedExpressions(List<CSExpression> expressions) {
-	    final ArrayList<CSNode> result = new ArrayList<CSNode>(expressions.size());
-	    for (CSNode e : expressions)
-	    	if (!(e instanceof CSRemovedExpression))
-	    		result.add(e);
+
+	private Iterable<CSNode> filterRemovedExpressions(
+			List<CSExpression> expressions) {
+		final ArrayList<CSNode> result = new ArrayList<CSNode>(
+				expressions.size());
+		for (CSNode e : expressions)
+			if (!(e instanceof CSRemovedExpression))
+				result.add(e);
 		return result;
-    }
+	}
 
 	public void visit(CSIndexedExpression node) {
 		node.expression().accept(this);
@@ -818,7 +832,7 @@ public class HaxePrinter extends CSVisitor {
 		writeCommaSeparatedList(node.indexes());
 		write("]");
 	}
-	
+
 	public void visit(CSCastExpression node) {
 		write("(");
 		node.type().accept(this);
@@ -827,11 +841,11 @@ public class HaxePrinter extends CSVisitor {
 			node.expression().accept(this);
 		}
 	}
-	
+
 	public void visit(CSReferenceExpression node) {
 		write(node.name());
 	}
-	
+
 	public void visit(CSMemberReferenceExpression node) {
 		node.expression().accept(this);
 		write(".");
@@ -843,108 +857,109 @@ public class HaxePrinter extends CSVisitor {
 		write("(");
 		if (node.isVarArgs()) {
 			if (parameters.size() > 1) {
-				writeCommaSeparatedList(parameters.subList(0, parameters.size()-1));
+				writeCommaSeparatedList(parameters.subList(0,
+						parameters.size() - 1));
 				write(", ");
 			}
 			write("/*params*/ ");
-			visit(parameters.get(parameters.size()-1));
+			visit(parameters.get(parameters.size() - 1));
 		} else {
 			writeCommaSeparatedList(parameters);
 		}
 		write(")");
 	}
-	
+
 	protected <T extends CSNode> void writeParameterList(Iterable<T> parameters) {
 		write("(");
 		writeCommaSeparatedList(parameters);
 		write(")");
 	}
-	
+
 	public void visit(CSField node) {
 		writeMemberHeader(node);
 		writeFieldModifiers(node);
 		writeDeclaration(node.type(), node.name(), node.initializer());
 	}
-	
+
 	public void visit(CSProperty node) {
-	    if (node.isIndexer()) {
-	        if (node.getter() != null) {
-		        writeMetaMemberHeader(node);
-		        write("function __indexerGet (");
-		        writeCommaSeparatedList(node.parameters());
-		        write(") : ");
-		        node.type().accept(this);
-		        writeLine();
-		        if (node.isAbstract()) {
-		            writeIndentedLine("{ throw \"abstract\"; }");
-		        } else {
-		            node.getter().accept(this);
-		        }
-	        }
-	
-	        if (node.setter() != null) {
-		        writeMetaMemberHeader(node);
-		        write("function __indexerSet (");
-		        writeCommaSeparatedList(node.parameters());
-		        write(", value : ");
-		        node.type().accept(this);
-		        writeLine(") : Void");
-		        if (node.isAbstract()) {
-		            writeIndentedLine("{ throw \"abstract\"; }");
-		        } else {
-		            node.setter().accept(this);
-		        }
-	        }
-	        // TODO: generate property? replace usages?
-	    } else {
-	        if (node.getter() != null) {
-		        write("private function __get");
-		        write(node.name());
-		        write("() : ");
-		        node.type().accept(this);
-		        writeLine();
-		        if (node.isAbstract()) {
-		            writeIndentedLine("{ throw \"abstract\"; }");
-		        } else {
-		            node.getter().accept(this);
-		        }
-	        }
-	
-	        if (node.setter() != null) {
-		        write("private function __set");
-		        write(node.name());
-		        write("(value : ");
-		        node.type().accept(this);
-		        writeLine(") : Void");
-		        if (node.isAbstract()) {
-		            writeIndentedLine("{ throw \"abstract\"; }");
-		        } else {
-		            node.setter().accept(this);
-		        }
-	        }
-	
-	        writeMetaMemberHeader(node);
-	        write(" var ");
-	        writeLine(node.name());
-	        write("(");
-	        if (node.getter() == null) {
-	            write("never");
-	        } else {
-		        write("__get");
-		        write(node.name());
-	        }
-	        write(",");
-	        if (node.setter() == null) {
-	            write("never");
-	        } else {
-	             write("__set");
-	             write(node.name());
-	        }
-	        write(")");
-	        write(" : ");
-	        node.type().accept(this);
-	        write(" ");
-	    }
+		if (node.isIndexer()) {
+			if (node.getter() != null) {
+				writeMetaMemberHeader(node);
+				write("function __indexerGet (");
+				writeCommaSeparatedList(node.parameters());
+				write(") : ");
+				node.type().accept(this);
+				writeLine();
+				if (node.isAbstract()) {
+					writeIndentedLine("{ throw \"abstract\"; }");
+				} else {
+					node.getter().accept(this);
+				}
+			}
+
+			if (node.setter() != null) {
+				writeMetaMemberHeader(node);
+				write("function __indexerSet (");
+				writeCommaSeparatedList(node.parameters());
+				write(", value : ");
+				node.type().accept(this);
+				writeLine(") : Void");
+				if (node.isAbstract()) {
+					writeIndentedLine("{ throw \"abstract\"; }");
+				} else {
+					node.setter().accept(this);
+				}
+			}
+			// TODO: generate property? replace usages?
+		} else {
+			if (node.getter() != null) {
+				write("private function __get");
+				write(node.name());
+				write("() : ");
+				node.type().accept(this);
+				writeLine();
+				if (node.isAbstract()) {
+					writeIndentedLine("{ throw \"abstract\"; }");
+				} else {
+					node.getter().accept(this);
+				}
+			}
+
+			if (node.setter() != null) {
+				write("private function __set");
+				write(node.name());
+				write("(value : ");
+				node.type().accept(this);
+				writeLine(") : Void");
+				if (node.isAbstract()) {
+					writeIndentedLine("{ throw \"abstract\"; }");
+				} else {
+					node.setter().accept(this);
+				}
+			}
+
+			writeMetaMemberHeader(node);
+			write(" var ");
+			writeLine(node.name());
+			write("(");
+			if (node.getter() == null) {
+				write("never");
+			} else {
+				write("__get");
+				write(node.name());
+			}
+			write(",");
+			if (node.setter() == null) {
+				write("never");
+			} else {
+				write("__set");
+				write(node.name());
+			}
+			write(")");
+			write(" : ");
+			node.type().accept(this);
+			write(" ");
+		}
 	}
 
 	private void writeMemberHeader(CSMember node) {
@@ -952,7 +967,7 @@ public class HaxePrinter extends CSVisitor {
 		writeAttributes(node);
 		writeVisibility(node);
 	}
-	
+
 	public void visit(CSEvent node) {
 		// TODO: i think we should ensure hxevents are not generated
 	}
@@ -962,7 +977,7 @@ public class HaxePrinter extends CSVisitor {
 		writeAttributes(node);
 		writeMethodHeader(node, node.modifier());
 	}
-	
+
 	public void visit(CSAttribute node) {
 		writeIndented("@:");
 		write(node.name());
@@ -970,24 +985,24 @@ public class HaxePrinter extends CSVisitor {
 			writeParameterList(node.arguments());
 		}
 	}
-	
+
 	@Override
 	public void visit(CSLabelStatement node) {
 		writeLine("/*" + node.label() + ": */");
 	}
-	
+
 	@Override
 	public void visit(CSDocTextOverlay node) {
 		writeXmlDoc(node.text());
 	}
-	
+
 	public void visit(CSDocTextNode node) {
 		writeXmlDoc(xmlEscape(node.text()));
 	}
 
 	private void writeXmlDoc(final String xmldocText) {
 		String[] lines = xmldocText.split("\n");
-		for (int i=0; i<lines.length; ++i) {
+		for (int i = 0; i < lines.length; ++i) {
 			if (i > 0) {
 				writeLine();
 				writeIndentation();
@@ -995,21 +1010,19 @@ public class HaxePrinter extends CSVisitor {
 			writeBlock(lines[i].trim().replace("<br>", "<br />"));
 		}
 	}
-	
 
 	private String xmlEscape(String text) {
 		return text.replaceAll("(<)(/?[^\\s][^>]*)(>)", ":lt:$2:gt:")
-					.replace("<", "&lt;").replace(">", "&gt;")
-					.replace(":lt:", "<")
-					.replace(":gt:", ">");
-		
+				.replace("<", "&lt;").replace(">", "&gt;").replace(":lt:", "<")
+				.replace(":gt:", ">");
+
 	}
-	
+
 	public void visit(CSDocTagNode node) {
 		String tagName = node.tagName();
 		List<CSDocAttributeNode> attributes = node.attributes();
 		List<CSDocNode> fragments = node.fragments();
-		
+
 		write("<");
 		write(tagName);
 		if (!attributes.isEmpty()) {
@@ -1022,7 +1035,7 @@ public class HaxePrinter extends CSVisitor {
 			}
 		}
 		write(">");
-		
+
 		if (fragments.size() > 1) {
 			writeLine();
 			for (CSDocNode f : fragments) {
@@ -1038,24 +1051,31 @@ public class HaxePrinter extends CSVisitor {
 			write("</" + tagName + ">");
 		}
 	}
-	
+
 	private void writeAttributes(CSMember node) {
 		visitList(node.attributes());
 	}
-	
+
 	private void writeFieldModifiers(CSField node) {
 		for (CSFieldModifier m : node.modifiers()) {
-			write(m.toString().toLowerCase());
-			write(" ");
+			String s = m.toString().toLowerCase();
+			if (s.equals("const")) {
+				write("inline ");
+			} else if (s.equals("readonly")) {
+			} else {
+				write(m.toString().toLowerCase());
+				write(" ");
+			}
+
 		}
 	}
-	
+
 	private void writeDoc(CSMember node) {
 		List<CSDocNode> docs = node.docs();
 		if (docs.isEmpty()) {
 			return;
 		}
-		
+
 		linePrefix("/// ");
 		for (CSDocNode doc : docs) {
 			writeIndentation();
@@ -1067,16 +1087,22 @@ public class HaxePrinter extends CSVisitor {
 
 	private String methodModifier(CSMethodModifier modifier) {
 		switch (modifier) {
-		case Static: return "static ";
-		case Virtual: return "";
-		case Abstract: return "/*abstract*/ ";
-		case AbstractOverride: return "/*abstract*/ override ";
-		case Sealed: return "/*sealed*/ override ";
-		case Override: return "override ";
+		case Static:
+			return "static ";
+		case Virtual:
+			return "";
+		case Abstract:
+			return "/*abstract*/ ";
+		case AbstractOverride:
+			return "/*abstract*/ override ";
+		case Sealed:
+			return "/*sealed*/ override ";
+		case Override:
+			return "override ";
 		}
 		return "";
 	}
-	
+
 	interface Closure {
 		void execute();
 	}
@@ -1088,106 +1114,111 @@ public class HaxePrinter extends CSVisitor {
 			}
 		});
 	}
-	
+
 	private <T extends CSNode> void writeCommaSeparatedList(Iterable<T> nodes) {
 		writeList(nodes, ", ");
 	}
-	
-	private <T extends CSNode> void writeList(Iterable<T> nodes, final String separator) {
+
+	private <T extends CSNode> void writeList(Iterable<T> nodes,
+			final String separator) {
 		writeSeparatedList(nodes, new Closure() {
 			public void execute() {
 				write(separator);
 			}
 		});
 	}
-	
-	private <T extends CSNode> void writeSeparatedList(Iterable<T> nodes, Closure separator) {
+
+	private <T extends CSNode> void writeSeparatedList(Iterable<T> nodes,
+			Closure separator) {
 		Iterator<T> iterator = nodes.iterator();
-		if (!iterator.hasNext()) return;
+		if (!iterator.hasNext())
+			return;
 		iterator.next().accept(this);
 		while (iterator.hasNext()) {
 			separator.execute();
 			iterator.next().accept(this);
 		}
 	}
-	
+
 	private String classModifier(CSClassModifier modifier) {
 		switch (modifier) {
-		case Abstract: return "/*abstract*/ ";
-		case Sealed: return "/*sealed*/ ";
+		case Abstract:
+			return "/*abstract*/ ";
+		case Sealed:
+			return "/*sealed*/ ";
 		}
 		return "";
 	}
-	
-    protected void enterBody() {
-//		writeLine();
-        writeIndentedLine("{");
-        indent();
+
+	protected void enterBody() {
+		// writeLine();
+		writeIndentedLine("{");
+		indent();
 	}
 
-    private void indent() {
-    	_writer.indent();
+	private void indent() {
+		_writer.indent();
 	}
-    
-    private void outdent() {
-    	_writer.outdent();
+
+	private void outdent() {
+		_writer.outdent();
 	}
-    
-    private void writeIndentation() {
+
+	private void writeIndentation() {
 		_writer.writeIndentation();
 	}
-    
-    private void writeIndented(String s) {
+
+	private void writeIndented(String s) {
 		_writer.writeIndented(s);
 	}
 
 	private void writeIndentedLine(String s) {
 		_writer.writeIndentedLine(s);
 	}
-	
+
 	private void write(String s) {
 		_writer.write(s);
 	}
-	
+
 	private void linePrefix(String s) {
-    	_writer.linePrefix(s);
+		_writer.linePrefix(s);
 	}
-	
+
 	private void writeBlock(String s) {
-    	_writer.writeBlock(s);
+		_writer.writeBlock(s);
 	}
-	
+
 	private void writeLine(String s) {
-    	_writer.writeLine(s);
+		_writer.writeLine(s);
 	}
 
 	private void writeLine() {
-    	_writer.writeLine();
+		_writer.writeLine();
 	}
 
 	protected void leaveBody() {
 		outdent();
-        writeIndentedLine("}");
+		writeIndentedLine("}");
 	}
-	
+
 	class CSharpTypeReferenceVisitor extends CSVisitor {
 		private CSVisitor _delegate;
-		
+
 		CSharpTypeReferenceVisitor(CSVisitor delegate) {
 			_delegate = delegate;
 		}
-		
+
 		@Override
 		public void visit(CSArrayTypeReference node) {
 			node.elementType().accept(_delegate);
 		}
-		
+
 		public void visit(CSTypeReferenceExpression node) {
 			node.accept(_delegate);
 		}
-		
+
 		public void visit(CSTypeReference node) {
 			node.accept(_delegate);
 		}
-	}	
+	}
 }

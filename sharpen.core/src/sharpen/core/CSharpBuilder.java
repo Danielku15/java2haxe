@@ -57,7 +57,7 @@ public class CSharpBuilder extends ASTVisitor {
 
 	private static final CSTypeReference OBJECT_TYPE_REFERENCE = new CSTypeReference("object");
 
-	private final CSCompilationUnit _compilationUnit;
+	protected final CSCompilationUnit _compilationUnit;
 
 	protected CSTypeDeclaration _currentType;
 
@@ -92,8 +92,7 @@ public class CSharpBuilder extends ASTVisitor {
 	private Stack<HashMap<String,String>> _renamedVariables = new Stack<HashMap<String,String>> ();
 	
 	private ITypeBinding _currentExpectedType;
-
-
+	
 	protected NamingStrategy namingStrategy() {
 		return _configuration.getNamingStrategy();
 	}
@@ -258,7 +257,7 @@ public class CSharpBuilder extends ASTVisitor {
 
 	private CSAnonymousClassBuilder mapAnonymousClass(AnonymousClassDeclaration node) {
 		CSAnonymousClassBuilder builder = new CSAnonymousClassBuilder(this, node);
-		_currentType.addMember(builder.type());
+		_compilationUnit.addType(builder.type());
 		return builder;
 	}
 

@@ -142,7 +142,8 @@ public class CSAnonymousClassBuilder extends AbstractNestedClassBuilder {
 		}
 		captureNeededVariables(builder);
 		pushExpression(builder.createConstructorInvocation());
-		_currentType.addMember(builder.type());
+		
+		compilationUnit().addType(builder.type());
 		return false;
 	}
 	
