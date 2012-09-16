@@ -15,4 +15,7 @@ public interface Mappings {
 
 	MemberMapping effectiveMappingFor(IMethodBinding binding);
 
+	String currentNamespace();
+	
+	void currentNamespace(String currentNamespace);
 }

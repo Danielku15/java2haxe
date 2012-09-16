@@ -107,7 +107,6 @@ public class CSharpBuilder extends ASTVisitor {
 		_ast = my(CompilationUnit.class);
 		_resolver = my(ASTResolver.class);
 		_compilationUnit = my(CSCompilationUnit.class);
-		_compilationUnit.addUsing(new CSUsing ("Sharpen"));
 	}
 
 	protected CSharpBuilder(CSharpBuilder other) {
@@ -3724,6 +3723,12 @@ public class CSharpBuilder extends ASTVisitor {
 	}
 
 	public boolean visit(CompilationUnit node) {
+		if(node.getPackage() != null) {
+			my(Mappings.class).currentNamespace(node.getPackage().getName().getFullyQualifiedName());
+		}
+		else {
+			my(Mappings.class).currentNamespace(null);
+		}
 		return true;
 	}
 

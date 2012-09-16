@@ -21,6 +21,7 @@ public class MappingsImpl implements Mappings {
 	private final Annotations _annotations = my(Annotations.class);
 	private final Bindings _bindings = my(Bindings.class);
 	private final PreserveFullyQualifiedNamesState _preserveFQNState = my(PreserveFullyQualifiedNamesState.class);
+	private String _currentNamespace;
 	
 	public String mappedFieldName(IVariableBinding binding) {
 		if (!binding.isField())
@@ -124,7 +125,9 @@ public class MappingsImpl implements Mappings {
 		if (keepFullyQualified(name))
 			return fullName;
 
-		_compilationUnit.addUsing(new CSUsing(fullName));
+		if(!namespace.equals(_currentNamespace)) {
+			_compilationUnit.addUsing(new CSUsing(fullName));
+		}
 		return name;
 	}
 
@@ -281,4 +284,14 @@ public class MappingsImpl implements Mappings {
 	private String mappedTypeName(String typeName, String defaultValue) {
 		return _configuration.mappedTypeName(typeName, defaultValue);
 	}	
+	
+	@Override
+	public String currentNamespace() {
+		return _currentNamespace;
+	}
+	
+	@Override
+	public void currentNamespace(String currentNamespace) {
+		_currentNamespace = currentNamespace;
+	}
 }
