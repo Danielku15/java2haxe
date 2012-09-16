@@ -1402,13 +1402,13 @@ public class CSharpBuilder extends ASTVisitor {
 	    }
 	    
     	property.setter().addStatement(0,
-    			newVariableDeclarationExpression(parameterName, property.type(), new CSReferenceExpression("value")));
+    			newVariableDeclarationExpression(parameterName, false, property.type(), new CSReferenceExpression("value")));
     }
 
-	private CSDeclarationExpression newVariableDeclarationExpression(final String name,
+	private CSDeclarationExpression newVariableDeclarationExpression(final String name, final boolean parameter,
             final CSTypeReferenceExpression type, final CSReferenceExpression initializer) {
 	    return new CSDeclarationExpression(
-	    	new CSVariableDeclaration(name, type, initializer));
+	    	new CSVariableDeclaration(name, parameter, type, initializer));
     }
 
 	private CSProperty newPropertyFor(MethodDeclaration node, final String propName) {
@@ -1865,10 +1865,10 @@ public class CSharpBuilder extends ASTVisitor {
 		ITypeBinding saved = pushExpectedType(binding.getType());
 		CSExpression initializer = mapExpression(variable.getInitializer());
 		popExpectedType(saved);
-		return createVariableDeclaration(binding, initializer);
+		return createVariableDeclaration(binding, initializer, false);
 	}
 
-	private CSVariableDeclaration createVariableDeclaration(IVariableBinding binding, CSExpression initializer) {
+	private CSVariableDeclaration createVariableDeclaration(IVariableBinding binding, CSExpression initializer, boolean parameter) {
 		String name = binding.getName();
 		if (_blockVariables.size() > 0) {
 			if (_blockVariables.peek().contains(name)) {
@@ -1883,7 +1883,7 @@ public class CSharpBuilder extends ASTVisitor {
 			for (Set<String> s : _blockVariables)
 				s.add(name);
 		}
-		return new CSVariableDeclaration(identifier(name), mappedTypeReference(binding.getType()),
+		return new CSVariableDeclaration(identifier(name), parameter, mappedTypeReference(binding.getType()),
 		        initializer);
 	}
 
@@ -2037,7 +2037,7 @@ public class CSharpBuilder extends ASTVisitor {
 			if (isEmptyCatch(node, check)) {
 				clause = new CSCatchClause();
 			} else {
-				clause = new CSCatchClause(createVariableDeclaration(_currentExceptionVariable, null));
+				clause = new CSCatchClause(createVariableDeclaration(_currentExceptionVariable, null, true));
 			}
 			clause.anonymous(!check.used());
 			visitBlock(clause.body(), node.getBody());
@@ -3356,7 +3356,7 @@ public class CSharpBuilder extends ASTVisitor {
 	}
 
 	private CSVariableDeclaration createParameter(SingleVariableDeclaration declaration) {
-		return createVariableDeclaration(declaration.resolveBinding(), null);
+		return createVariableDeclaration(declaration.resolveBinding(), null, true);
 	}
 
 	protected void visit(List nodes) {

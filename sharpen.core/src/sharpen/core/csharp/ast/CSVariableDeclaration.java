@@ -24,15 +24,21 @@ package sharpen.core.csharp.ast;
 public class CSVariableDeclaration extends CSNode {
 	
 	private String _name;
+	private boolean _parameter;
 	private CSTypeReferenceExpression _type;
 	private CSExpression _initializer;
 	
 	public CSVariableDeclaration(String name, CSTypeReferenceExpression type) {
 		this(name, type, null);
 	}
-
+	
 	public CSVariableDeclaration(String name, CSTypeReferenceExpression type, CSExpression initializer) {
+		this(name, false, type, initializer);
+	}
+
+	public CSVariableDeclaration(String name, boolean parameter, CSTypeReferenceExpression type, CSExpression initializer) {
 		_name = name;
+		_parameter = parameter;
 		_type = type;
 		_initializer = initializer;
 	}
@@ -53,6 +59,10 @@ public class CSVariableDeclaration extends CSNode {
 		return _name;
 	}
 	
+	public boolean parameter() {
+		return _parameter;
+	}
+	
 	public void initializer(CSExpression initializer) {
 		_initializer = initializer;
 	}
@@ -63,5 +73,9 @@ public class CSVariableDeclaration extends CSNode {
 
 	public void name(String name) {
 		_name = name;
+	}
+	
+	public void parameter(boolean parameter) {
+		_parameter = parameter;
 	}
 }
