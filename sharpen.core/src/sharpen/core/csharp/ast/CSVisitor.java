@@ -152,9 +152,6 @@ public class CSVisitor {
 
 	public void visit(CSArrayInitializerExpression node) {
 	}
-	
-	public void visit(CSAssertStatement node) {		
-	}
 
 	public void visit(CSForStatement node) {
 	}
@@ -240,13 +237,9 @@ public class CSVisitor {
 	public void visit(CSMacroTypeReference node) {
     }
 
-	public void visit(CSLabel node) {		
+	public void visit(CSLabelStatement node) {
 	}
-	
-	public void visit(CSLabeledStatement node){
-	}
-	
-	public void visit(CSGotoStatement node){
-	}
-}	
 
+	public void visit(CSGotoStatement node) {
+	}
+}

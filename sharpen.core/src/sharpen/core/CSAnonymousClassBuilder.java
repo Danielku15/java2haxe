@@ -80,7 +80,8 @@ public class CSAnonymousClassBuilder extends AbstractNestedClassBuilder {
 		
 		final ITypeBinding[] ctorParameterTypes = classInstanceCreation().resolveConstructorBinding().getParameterTypes();
 		
-		_constructor.chainedConstructorInvocation(new CSConstructorInvocationExpression(new CSBaseExpression()));
+		if (null == _constructor.chainedConstructorInvocation ())
+			_constructor.chainedConstructorInvocation(new CSConstructorInvocationExpression(new CSBaseExpression()));
 		
 		for (int i=0; i<ctorParameterTypes.length; ++i) {
 			ITypeBinding parameterType = ctorParameterTypes[i];
@@ -107,9 +108,9 @@ public class CSAnonymousClassBuilder extends AbstractNestedClassBuilder {
 		setUpAnonymousType();
 		setUpConstructor();
 		processAnonymousBody();
-		flushCapturedVariables();
+		int capturedVariableCount = flushCapturedVariables();
 		flushFieldInitializers();
-		flushInstanceInitializers(_type);
+		flushInstanceInitializers(_type, capturedVariableCount);
 	}
 
 	private void flushFieldInitializers() {
@@ -211,7 +212,15 @@ public class CSAnonymousClassBuilder extends AbstractNestedClassBuilder {
 	private CSClass classForAnonymousType() {
 		CSClass type = new CSClass(anonymousInnerClassName(), CSClassModifier.Sealed);
 		type.visibility(CSVisibility.Private);
-		type.addBaseType(new CSTypeReference(anonymousBaseTypeName()));
+		ITypeBinding bt = anonymousBaseType();
+		CSTypeReference tref = new CSTypeReference(anonymousBaseTypeName()); 
+		type.addBaseType(tref);
+		for (ITypeBinding arg : bt.getTypeArguments()) {
+			tref.addTypeArgument(mappedTypeReference(arg));
+		}
+		ITypeBinding tt = anonymousBaseType();
+		for (ITypeBinding tp : tt.getTypeParameters())
+			type.addTypeParameter(new CSTypeParameter(identifier(tp.getName())));
 		return type;
 	}
 	
@@ -221,14 +230,26 @@ public class CSAnonymousClassBuilder extends AbstractNestedClassBuilder {
 		_type.addMember(_constructor);
 	}
 	
-	private void flushCapturedVariables() {		
+	private int flushCapturedVariables() {		
+		int capturedVariableCount = 0;
 		if (isEnclosingReferenceRequired()) {
-			addFieldParameter(createEnclosingField());
+			capturedVariableCount++;
+			CSField ef = createEnclosingField();
+			addFieldParameter(ef);
+			ITypeBinding bt = anonymousBaseType();
+			if (bt != null && isNonStaticNestedType (bt)) {
+				if (null == _constructor.chainedConstructorInvocation ())
+					_constructor.chainedConstructorInvocation(new CSConstructorInvocationExpression(new CSBaseExpression()));
+				_constructor.chainedConstructorInvocation().addArgument(new CSReferenceExpression(ef.name()));
+			}
 		}
 		
 		for (IVariableBinding variable : _capturedVariables) {
+			capturedVariableCount++;
 			addFieldParameter(identifier(variable.getName()), mappedTypeReference(variable.getType()));
 		}
+		
+		return capturedVariableCount;
 	}
 	
 	private void captureExternalLocalVariables() {

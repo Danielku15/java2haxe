@@ -26,29 +26,19 @@ public class CSVariableDeclaration extends CSNode {
 	private String _name;
 	private CSTypeReferenceExpression _type;
 	private CSExpression _initializer;
-	private boolean _isParameter;
 	
 	public CSVariableDeclaration(String name, CSTypeReferenceExpression type) {
-		this(name, type, null, false);
+		this(name, type, null);
 	}
 
-    public CSVariableDeclaration(String name, CSTypeReferenceExpression type, CSExpression initializer) {
-       this(name, type, initializer, false);
-    }
-    
-	public CSVariableDeclaration(String name, CSTypeReferenceExpression type, CSExpression initializer, boolean isParameter) {
+	public CSVariableDeclaration(String name, CSTypeReferenceExpression type, CSExpression initializer) {
 		_name = name;
 		_type = type;
 		_initializer = initializer;
-		_isParameter = isParameter;
 	}
 	
 	public void accept(CSVisitor visitor) {
 		visitor.visit(this);
-	}
-	
-	public boolean isParameter() {
-	    return _isParameter;
 	}
 
 	public CSTypeReferenceExpression type() {

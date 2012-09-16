@@ -39,6 +39,9 @@ public abstract class CSMember extends CSNode {
 	
 	private List<CSAttribute> _attributes = new ArrayList<CSAttribute>();
 	
+    private boolean _newModifier;
+	
+
 	protected CSMember(String name) {
 		_name = name;
 	}
@@ -74,12 +77,30 @@ public abstract class CSMember extends CSNode {
 		_attributes.add(attribute);
 	}
 	
+	public boolean removeAttribute (String name) {
+		for (CSAttribute at : _attributes) {
+			if (at.name().equals(name)) {
+				_attributes.remove(at);
+				return true;
+			}
+		}
+		return false;
+	}
+	
 	public List<CSAttribute> attributes() {
 		return Collections.unmodifiableList(_attributes);
 	}
 	
 	public String signature() {
 		return _name;
+	}
+	
+	public boolean isNewModifier() {
+		return _newModifier;
+	}
+
+	public void setNewModifier(boolean newModifier) {
+		_newModifier = newModifier;
 	}
 
 }

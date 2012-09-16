@@ -47,7 +47,7 @@ public class SharpenConversionBatch extends ConversionBatch {
 	private final Configuration _configuration;	
 
 	public SharpenConversionBatch() {
-		this(new Configuration());
+		this(Sharpen.getDefault().configuration());
 	}
 	
 	public SharpenConversionBatch(Configuration configuration) {
@@ -70,7 +70,7 @@ public class SharpenConversionBatch extends ConversionBatch {
 		converter.setSource(source);
 		converter.setASTResolver(resolver);
 		CSCompilationUnit result = converter.run(ast);
-		if (!result.ignore()) {
+		if (writer.getBuffer().length() > 0) {
 			saveConvertedFile(source, result, writer);
 		}
 	}
@@ -83,7 +83,7 @@ public class SharpenConversionBatch extends ConversionBatch {
 	private void saveConvertedFile(ICompilationUnit cu, CSCompilationUnit csModule, StringWriter convertedContents) throws JavaModelException, CoreException, UnsupportedEncodingException {
 		String newName = csModule.elementName();
 		if (newName == null) {
-			newName = getNameWithoutExtension(cu.getElementName()) + ".hx";
+			newName = getNameWithoutExtension(cu.getElementName()) + ".cs";
 		}
 
 		IFolder folder = targetFolderForCompilationUnit(cu, csModule.namespace());

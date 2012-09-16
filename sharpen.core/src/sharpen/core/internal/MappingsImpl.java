@@ -22,7 +22,6 @@ public class MappingsImpl implements Mappings {
 	private final Bindings _bindings = my(Bindings.class);
 	private final PreserveFullyQualifiedNamesState _preserveFQNState = my(PreserveFullyQualifiedNamesState.class);
 	
-	@Override
 	public String mappedFieldName(IVariableBinding binding) {
 		if (!binding.isField())
 			return null;
@@ -33,25 +32,26 @@ public class MappingsImpl implements Mappings {
 				: null;
 	}
 
-	@Override
 	public String mappedMethodName(IMethodBinding binding) {
 		Configuration.MemberMapping mapping = effectiveMappingFor(binding);
 		return computeMethodName(binding, mapping);
 	}
 
-	@Override
 	public String mappedTypeName(ITypeBinding type) {
 		if (type.isArray() || type.isWildcardType()) {
 			return type.getQualifiedName();
 		}
+		
 		if (!hasMapping(type)) {
 			String annotatedRenaming = annotatedRenaming(type);
 			if (annotatedRenaming != null) {
-				return registerMappedType(type, annotatedRenaming);
+				return registerMappedType(type, fullyQualifyIfNeeded(annotatedRenaming, type));
 			}
 		}
 		
-		String mappedTypeName = mappedTypeName(typeMappingKey(type), qualifiedName(type));
+		String mappedTypeName = mappedTypeName(BindingUtils.typeMappingKey(type), qualifiedName(type));
+		if (mappedTypeName.length() == 0)
+			mappedTypeName = "_T" + Math.abs(type.getKey().hashCode());
 		if (shouldPrefixInterface(type)) {
 			return registerMappedType(type, mappedInterfaceName(mappedTypeName));
 		}
@@ -59,10 +59,37 @@ public class MappingsImpl implements Mappings {
 		return registerMappedType(type, mappedTypeName);
 	}
 
+	private String fullyQualifyIfNeeded(String typeName, ITypeBinding type) {
+		if (isFullyQualified(typeName)) {
+			return typeName;
+		}
+		
+		final String originalNamespace = namespace(qualifiedName(type));
+		final String mappedNamespace = _configuration.mappedNamespace(originalNamespace);
+		if (originalNamespace.equals(mappedNamespace)) {
+			return typeName;
+		}
+		
+		return mappedNamespace + "." + typeName;
+	}
+	
+	private String namespace(final String typeName) {
+		return substringBeforeLast(typeName, '.');
+	}
+
+	private String substringBeforeLast(String s, char marker) {
+		return s.substring(0, s.lastIndexOf(marker));
+	}
+
+	private boolean isFullyQualified(String typeName) {
+		return typeName.contains(".");
+	}
+
 	private String annotatedRenaming(ITypeBinding type) {
 		if (type.isTypeVariable()) return null;
 		
-		final AbstractTypeDeclaration typeDeclaration = findDeclaringNode(type);
+		final ASTNode node = findDeclaringNode(type);
+		AbstractTypeDeclaration typeDeclaration = node instanceof AbstractTypeDeclaration ? (AbstractTypeDeclaration) node: null;  
 		return (typeDeclaration != null && isAnnotatedWith(typeDeclaration, SharpenAnnotations.SHARPEN_RENAME)) 
 				? annotatedRenaming(typeDeclaration)
 				: null;
@@ -97,7 +124,7 @@ public class MappingsImpl implements Mappings {
 		if (keepFullyQualified(name))
 			return fullName;
 
-		_compilationUnit.addUsing(new CSUsing(fullName));
+		_compilationUnit.addUsing(new CSUsing(namespace));
 		return name;
 	}
 
@@ -129,16 +156,8 @@ public class MappingsImpl implements Mappings {
 	}
 
 	private boolean hasMapping(ITypeBinding type) {
-		return _configuration.typeHasMapping(typeMappingKey(type));
+		return _configuration.typeHasMapping(BindingUtils.typeMappingKey(type));
 	}
-	
-	private String typeMappingKey(ITypeBinding type) {
-		final ITypeBinding[] typeArguments = type.getTypeArguments();
-		if (typeArguments.length > 0) {
-			return qualifiedName(type) + "<" + repeat(',', typeArguments.length - 1) + ">";
-		}
-		return qualifiedName(type);
-	}	
 	
 	private String mappedInterfaceName(String name) {
 		int pos = name.lastIndexOf('.');
@@ -149,7 +168,6 @@ public class MappingsImpl implements Mappings {
 		return _configuration.toInterfaceName(name);
 	}
 
-	@Override
 	public Configuration.MemberMapping effectiveMappingFor(final IMethodBinding binding) {
 		final MemberMapping mapping = configuredMappingFor(binding);
 		if (null != mapping)
@@ -187,15 +205,10 @@ public class MappingsImpl implements Mappings {
 		ITypeBinding declaringClassBinding = binding.getDeclaringClass();
 		if (declaringClassBinding.isAnonymous()) return false;
 		
-		try {
-    		BodyDeclaration declaringClass = findDeclaringNode(declaringClassBinding);
-    		return declaringClass == null 
-    					? false 
-    					: isAnnotatedWith(declaringClass, SharpenAnnotations.SHARPEN_IGNORE_EXTENDS);
-		}
-		catch(Throwable e) {
-		    return false;
-		}
+		AbstractTypeDeclaration declaringClass = findDeclaringNode(declaringClassBinding);
+		return declaringClass == null 
+					? false 
+					: isAnnotatedWith(declaringClass, SharpenAnnotations.SHARPEN_IGNORE_EXTENDS);
 	}
 	
 	private String annotatedRenaming(BodyDeclaration method) {
@@ -258,14 +271,6 @@ public class MappingsImpl implements Mappings {
 	
 	private IMethodBinding originalMethodBinding(IMethodBinding binding) {
 		return _bindings.originalBindingFor(binding);
-	}
-	
-	private String repeat(char c, int count) {
-		StringBuilder builder = new StringBuilder(count);
-		for (int i = 0; i < count; ++i) {
-			builder.append(c);
-		}
-		return builder.toString();
 	}
 	
 	private String mappedTypeName(String typeName, String defaultValue) {

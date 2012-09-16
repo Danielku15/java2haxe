@@ -60,7 +60,7 @@ public class SharpenCommandLine {
 	 * method that can be mapped to the runtime class see {@link Configuration#runtimeMethod}
 	 * call hierarchy. 
 	 */
-	public String runtimeTypeName = Configuration.DEFAULT_RUNTIME_TYPE_NAME;
+	public String runtimeTypeName = ConfigurationFactory.DEFAULT_RUNTIME_TYPE_NAME;
 	public boolean nativeTypeSystem;
 	public PascalCaseOptions pascalCase = PascalCaseOptions.None;
 	public String project;
@@ -72,9 +72,12 @@ public class SharpenCommandLine {
 	public boolean nativeInterfaces;
 	public boolean organizeUsings;
 	final public List<String> fullyQualifiedTypes = new ArrayList<String>();
+	final public List<String> partialTypes = new ArrayList<String>();
 	public String headerFile;
 	public String xmldoc;
 	public final List<Configuration.NameMapping> eventMappings = new ArrayList<Configuration.NameMapping>();
 	public final List<String> eventAddMappings = new ArrayList<String>();
 	public final Map<String, String> conditionalCompilation = new HashMap<String, String>();
+	public String configurationClass;
+	public boolean junitConversion;
 }

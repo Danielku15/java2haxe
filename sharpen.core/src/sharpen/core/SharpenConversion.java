@@ -26,9 +26,9 @@ import java.io.Writer;
 import java.util.HashMap;
 import java.util.Map;
 
+import sharpen.core.csharp.CSharpPrinter;
 import sharpen.core.csharp.ast.CSCompilationUnit;
 import sharpen.core.framework.*;
-import sharpen.core.haxe.HaxePrinter;
 
 import org.eclipse.core.resources.IMarker;
 import org.eclipse.core.resources.IResource;
@@ -39,12 +39,11 @@ import org.eclipse.jdt.core.dom.*;
 
 public class SharpenConversion {
 
-	private HaxePrinter _printer;
+	private CSharpPrinter _printer;
 	protected ICompilationUnit _source;
 	protected Writer _writer;
 	protected final Configuration _configuration;
 	private ASTResolver _resolver = new ASTResolver() {
-		@Override
 		public ASTNode findDeclaringNode(IBinding binding) {
 			return null;
 		}
@@ -66,13 +65,13 @@ public class SharpenConversion {
 		return _writer;
 	}
 
-	public void setPrinter(HaxePrinter printer) {
+	public void setPrinter(CSharpPrinter printer) {
 		_printer = printer;
 	}
 
-	private HaxePrinter getPrinter() {
+	private CSharpPrinter getPrinter() {
 		if (null == _printer) {
-			_printer = new HaxePrinter();
+			_printer = new CSharpPrinter();
 		}
 		return _printer;
 	}
@@ -95,7 +94,7 @@ public class SharpenConversion {
 	}
 
 	private void printTree(CSCompilationUnit unit) {
-	    HaxePrinter printer = getPrinter();
+		CSharpPrinter printer = getPrinter();
 		printer.setWriter(_writer);
 		printer.print(unit);
 	}
@@ -104,7 +103,7 @@ public class SharpenConversion {
 		processProblems(ast);
 		prepareForConversion(ast);		
 		CSCompilationUnit cs = convert(ast);
-		if (!cs.ignore()) {
+		if (!cs.ignore() && !cs.types().isEmpty()) {
 			print(cs);
 		}
 		return cs;
