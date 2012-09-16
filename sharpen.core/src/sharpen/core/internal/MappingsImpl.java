@@ -205,10 +205,15 @@ public class MappingsImpl implements Mappings {
 		ITypeBinding declaringClassBinding = binding.getDeclaringClass();
 		if (declaringClassBinding.isAnonymous()) return false;
 		
-		AbstractTypeDeclaration declaringClass = findDeclaringNode(declaringClassBinding);
-		return declaringClass == null 
-					? false 
-					: isAnnotatedWith(declaringClass, SharpenAnnotations.SHARPEN_IGNORE_EXTENDS);
+		try {
+			AbstractTypeDeclaration declaringClass = findDeclaringNode(declaringClassBinding);
+			return declaringClass == null 
+						? false 
+						: isAnnotatedWith(declaringClass, SharpenAnnotations.SHARPEN_IGNORE_EXTENDS);
+		}
+		catch(Throwable e) {
+			return false;
+		}
 	}
 	
 	private String annotatedRenaming(BodyDeclaration method) {

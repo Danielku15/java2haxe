@@ -74,7 +74,7 @@
 			</java>
 			<mkdir dir="@{outdir}"/>
 			<copy todir="@{outdir}">
-				<fileset dir="@{directory}/build/@{project}.net/@{sources}" includes="**" />
+				<fileset dir="@{directory}/build/@{project}.haxe/@{sources}" includes="**" />
 			</copy>
 		</sequential>
 	</macrodef>
