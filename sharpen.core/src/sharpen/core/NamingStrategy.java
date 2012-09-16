@@ -30,9 +30,9 @@ public class NamingStrategy {
 	static Map<String, String> _identifierMappings = new HashMap<String, String>();
 	
 	static {
-		keywords("readonly", "params", "override", "event", "operator",
-				"internal", "base", "ref", "out", "as", "is", "in",
-				"object", "string", "bool", "using");
+		keywords("callback", "cast", "dynamic", "extern", 
+				"function", "here", "in", "inline", "never", 
+				"override", "trace", "typedef", "using");
 		mapIdentifier("lock", "Lock");
 		mapIdentifier("delegate", "delegate_");
 	}
