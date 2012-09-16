@@ -124,7 +124,7 @@ public class MappingsImpl implements Mappings {
 		if (keepFullyQualified(name))
 			return fullName;
 
-		_compilationUnit.addUsing(new CSUsing(namespace));
+		_compilationUnit.addUsing(new CSUsing(fullName));
 		return name;
 	}
 
