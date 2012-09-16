@@ -356,22 +356,26 @@ public class HaxePrinter extends CSVisitor {
 	}
 	
 	public void visit(CSMethod node) {
-		printPrecedingComments(node);
-		beginEnclosingIfDefs(node);
-		writeDoc(node);
-		writeAttributes(node);
-		writeMethodHeader(node, node.modifier());
-		node.returnType().accept(this);
-		write(" ");
-		writeMethodName(node);
-		writeTypeParameters(node);
-		writeParameterList(node);
-		if (node.isAbstract()) {
-			writeLine(";");
-		} else {
-			writeMethodBody(node);
-		}
-		endEnclosingIfDefs(node);
+	    printPrecedingComments(node);
+	    beginEnclosingIfDefs(node);
+	    writeDoc(node);
+	    writeAttributes(node);
+	    writeMethodHeader(node, node.modifier());
+	    write("function ");
+	    writeMethodName(node);
+	    writeTypeParameters(node);
+	    writeParameterList(node);
+	    write(" : ");
+	    node.returnType().accept(this);
+
+	    if(_currentType instanceof CSInterface) {
+	    	writeLine(";");
+	    } else if (node.isAbstract()) {
+	        writeLine("{ throw \"abstract\"; }");
+	    } else {
+	        writeMethodBody(node);
+	    }
+	    endEnclosingIfDefs(node);
 	}
 
 	private void endEnclosingIfDefs(CSNode node) {
