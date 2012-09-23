@@ -25,6 +25,44 @@ public class MappingsImpl implements Mappings {
 	
 	private Map<ITypeBinding, Map<IMethodBinding, String>> _constructorMethods = new HashMap<>();
 	
+	private Map<String, List<IMethodBinding>> _overloadLookup = new HashMap<String, List<IMethodBinding>>();
+	private Map<IMethodBinding,String> _methodOverloads = new HashMap<>();
+	
+	@Override
+	public String methodOverload(IMethodBinding binding, String name) {
+		// check if method already registered
+		if(_methodOverloads.containsKey(binding)) {
+			return _methodOverloads.get(binding);
+		}
+		
+		String fqn = binding.getDeclaringClass().getQualifiedName() + "." + binding.getName();
+
+		// create overload lookup table if needed
+		List<IMethodBinding> overloads;
+		if(!_overloadLookup.containsKey(fqn)) {
+			overloads = new ArrayList<>();
+			_overloadLookup.put(fqn, overloads);
+		}
+		else {
+			overloads = _overloadLookup.get(fqn);
+		}
+
+		// add current method to registered overloads
+		overloads.add(binding);
+		
+		// create method name for new overload
+		String methodName;
+		if(overloads.size() == 1) {
+			methodName = name;
+		}
+		else {
+			methodName = name + (overloads.size() - 1);
+		}
+		_methodOverloads.put(binding, methodName);
+	
+		return methodName;
+	}
+	
 	@Override
 	public String constructorMethod(ITypeBinding type, IMethodBinding ctor) {
 		// TODO: we will need to check how to handle ctor overloading if the base class is a built in type

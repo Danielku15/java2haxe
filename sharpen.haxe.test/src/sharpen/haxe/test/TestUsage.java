@@ -21,5 +21,11 @@ public class TestUsage
         new TestClass();
         new TestClass(3);
         new TestClass("Test");
+
+        // invocations
+        TestClass t = new TestClass();
+        t.test();
+        t.test(3);
+        t.test("Test");
     }
 }

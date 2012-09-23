@@ -16,4 +16,19 @@ public class TestClass
     {
         System.out.println(s);
     }
+
+    public void test()
+    {
+        System.out.println("test");
+    }
+
+    public void test(int i)
+    {
+        System.out.println(i);
+    }
+
+    public void test(String s)
+    {
+        System.out.println(s);
+    }
 }

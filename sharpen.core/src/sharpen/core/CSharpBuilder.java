@@ -23,6 +23,7 @@ package sharpen.core;
 
 
 import java.util.*;
+import java.util.Map.Entry;
 import java.util.regex.*;
 
 import org.eclipse.jdt.core.*;
@@ -1442,7 +1443,8 @@ public class CSharpBuilder extends ASTVisitor {
 			return;
 		}
 
-		CSMethod method = new CSMethod(mappedMethodDeclarationName(node));
+		String methodName = my(Mappings.class).methodOverload(node.resolveBinding(), mappedMethodDeclarationName(node));
+		CSMethod method = new CSMethod(methodName);
 		method.returnType(mappedReturnType(node));
 		method.modifier(mapMethodModifier(node));
 		mapTypeParameters(node.typeParameters(), method);
@@ -2697,10 +2699,15 @@ public class CSharpBuilder extends ASTVisitor {
 	
 	private String resolveTargetMethodName(CSExpression targetExpression, MethodInvocation node) {
 		final IMethodBinding method = staticImportMethodBinding(node.getName(), _ast.imports());
+		
+		String methodName;
 		if(method != null && targetExpression == null){
-			return mappedTypeName(method.getDeclaringClass()) + "." + mappedMethodName(node.resolveMethodBinding());
+			methodName = my(Mappings.class).methodOverload(method, mappedMethodName(node.resolveMethodBinding()));
+			return mappedTypeName(method.getDeclaringClass()) + "." + methodName;
 		}
-		return mappedMethodName(node.resolveMethodBinding());
+		
+		methodName = my(Mappings.class).methodOverload(node.resolveMethodBinding(), mappedMethodName(node.resolveMethodBinding()));
+		return methodName;
 	}
 
 	private void mapTypeArguments(CSMethodInvocationExpression mie, MethodInvocation node) {

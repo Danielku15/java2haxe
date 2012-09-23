@@ -20,4 +20,6 @@ public interface Mappings {
 	void currentNamespace(String currentNamespace);
 
 	String constructorMethod(ITypeBinding type, IMethodBinding ctor);
+	
+	String methodOverload(IMethodBinding binding, String name);
 }
