@@ -154,8 +154,6 @@ public abstract class Configuration {
 	    mapMethod("java.lang.String.startsWith", "StartsWith");
 	    mapMethod("java.lang.String.endsWith", "EndsWith");
 		mapMethod("java.lang.String.substring", runtimeMethod("substring"));
-	    mapIndexer("java.lang.String.charAt");
-	    mapIndexer("java.lang.CharSequence.charAt");
 	    mapMethod("java.lang.String.getChars", runtimeMethod("getCharsForString"));
 	    mapMethod("java.lang.String.getBytes", runtimeMethod("getBytesForString"));
 	    mapMethod("java.lang.String.equalsIgnoreCase", runtimeMethod("equalsIgnoreCase"));
@@ -350,10 +348,6 @@ public abstract class Configuration {
 		mapMember(fromQualifiedName, new MemberMapping(to, MemberKind.Method));
 	}
 	
-	public void mapIndexer(String fromQualifiedName) {
-		mapMember(fromQualifiedName, new MemberMapping(null, MemberKind.Indexer));
-	}
-
 	public void mapProperty(String fromQualifiedName, String to) {
 		mapMember(fromQualifiedName, new MemberMapping(to, MemberKind.Property));
 	}

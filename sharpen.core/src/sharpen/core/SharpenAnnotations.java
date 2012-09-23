@@ -61,8 +61,6 @@ public class SharpenAnnotations {
 	
 	public static final String SHARPEN_PROPERTY = "@sharpen.property";
 	
-	public static final String SHARPEN_INDEXER = "@sharpen.indexer";
-	
 	static final String SHARPEN_IGNORE = "@sharpen.ignore";
 	
 	public static final String SHARPEN_IGNORE_EXTENDS = "@sharpen.ignore.extends";

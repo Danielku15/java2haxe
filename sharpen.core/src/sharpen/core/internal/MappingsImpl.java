@@ -219,9 +219,6 @@ public class MappingsImpl implements Mappings {
 		if (method == null)
 			return null;
 		
-		if (isAnnotatedWith(method, SharpenAnnotations.SHARPEN_INDEXER))
-			return new MemberMapping(null, MemberKind.Indexer);
-		
 		if (isAnnotatedWith(method, SharpenAnnotations.SHARPEN_EVENT))
 			return new MemberMapping(binding.getName(), MemberKind.Property);
 		

@@ -1310,22 +1310,9 @@ public class CSharpBuilder extends ASTVisitor {
 			return false;
 		}
 
-		if (isIndexer(node)) {
-			processIndexerDeclaration(node);
-			return false;
-		}
-
 		processMethodDeclaration(node);
 
 		return false;
-	}
-
-	private void processIndexerDeclaration(MethodDeclaration node) {
-		processPropertyDeclaration(node, CSProperty.INDEXER);
-	}
-
-	private boolean isIndexer(MethodDeclaration node) {
-		return isTaggedDeclaration(node, SharpenAnnotations.SHARPEN_INDEXER);
 	}
 
 	private boolean isRemoved(MethodDeclaration node) {
@@ -2689,19 +2676,13 @@ public class CSharpBuilder extends ASTVisitor {
 		Configuration.MemberMapping mapping = effectiveMappingFor(binding);
 
 		if (null == mapping) {
-			if (isIndexer(binding)) {
-				mapping = new MemberMapping(null, MemberKind.Indexer);
-			} else if (isTaggedMethodInvocation(binding, SharpenAnnotations.SHARPEN_EVENT)) {
+			if (isTaggedMethodInvocation(binding, SharpenAnnotations.SHARPEN_EVENT)) {
 				mapping = new MemberMapping(binding.getName(), MemberKind.Property);
 			} else if (isTaggedMethodInvocation(binding, SharpenAnnotations.SHARPEN_PROPERTY)) {
 				mapping = new MemberMapping(propertyName(binding), MemberKind.Property);
 			}
 		}
 		return mapping;
-	}
-
-	private boolean isIndexer(final IMethodBinding binding) {
-		return isTaggedMethod(binding, SharpenAnnotations.SHARPEN_INDEXER);
 	}
 
 	private boolean isTaggedMethod(final IMethodBinding binding, final String tag) {
@@ -3026,11 +3007,6 @@ public class CSharpBuilder extends ASTVisitor {
 	@SuppressWarnings("unchecked")
 	private void processMappedMethodInvocation(MethodInvocation node, IMethodBinding binding,
 	        Configuration.MemberMapping mapping) {
-
-		if (mapping.kind == MemberKind.Indexer) {
-			processIndexerInvocation(node, binding, mapping);
-			return;
-		}
 
 		String name = mappedMethodName(binding);
 		if (0 == name.length()) {

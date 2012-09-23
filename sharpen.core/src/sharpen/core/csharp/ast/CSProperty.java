@@ -25,8 +25,6 @@ import java.util.*;
 
 public class CSProperty extends CSMetaMember implements CSParameterized {
 
-	public static final String INDEXER = "this";
-	
 	private List<CSVariableDeclaration> _parameters;
 	
 	private CSBlock _getter;
@@ -70,9 +68,5 @@ public class CSProperty extends CSMetaMember implements CSParameterized {
 	
 	public CSBlock setter() {
 		return _setter;
-	}
-
-	public boolean isIndexer() {
-		return INDEXER.equals(name());
 	}
 }

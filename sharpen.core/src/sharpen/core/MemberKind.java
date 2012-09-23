@@ -28,5 +28,4 @@ public enum MemberKind {
 	Field,
 	Method,
 	Property,
-	Indexer,
 }

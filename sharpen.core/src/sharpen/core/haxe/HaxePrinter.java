@@ -927,84 +927,53 @@ public class HaxePrinter extends CSVisitor {
 	}
 
 	public void visit(CSProperty node) {
-		if (node.isIndexer()) {
-			if (node.getter() != null) {
-				writeMetaMemberHeader(node);
-				write("function __indexerGet (");
-				writeCommaSeparatedList(node.parameters());
-				write(") : ");
-				node.type().accept(this);
-				writeLine();
-				if (node.isAbstract()) {
-					writeIndentedLine("{ throw \"abstract\"; }");
-				} else {
-					node.getter().accept(this);
-				}
-			}
-
-			if (node.setter() != null) {
-				writeMetaMemberHeader(node);
-				write("function __indexerSet (");
-				writeCommaSeparatedList(node.parameters());
-				write(", value : ");
-				node.type().accept(this);
-				writeLine(") : Void");
-				if (node.isAbstract()) {
-					writeIndentedLine("{ throw \"abstract\"; }");
-				} else {
-					node.setter().accept(this);
-				}
-			}
-			// TODO: generate property? replace usages?
-		} else {
-			if (node.getter() != null) {
-				write("private function __get");
-				write(node.name());
-				write("() : ");
-				node.type().accept(this);
-				writeLine();
-				if (node.isAbstract()) {
-					writeIndentedLine("{ throw \"abstract\"; }");
-				} else {
-					node.getter().accept(this);
-				}
-			}
-
-			if (node.setter() != null) {
-				write("private function __set");
-				write(node.name());
-				write("(value : ");
-				node.type().accept(this);
-				writeLine(") : Void");
-				if (node.isAbstract()) {
-					writeIndentedLine("{ throw \"abstract\"; }");
-				} else {
-					node.setter().accept(this);
-				}
-			}
-
-			writeMetaMemberHeader(node);
-			write(" var ");
-			writeLine(node.name());
-			write("(");
-			if (node.getter() == null) {
-				write("never");
-			} else {
-				write("__get");
-				write(node.name());
-			}
-			write(",");
-			if (node.setter() == null) {
-				write("never");
-			} else {
-				write("__set");
-				write(node.name());
-			}
-			write(")");
-			write(" : ");
+		if (node.getter() != null) {
+			write("private function __get");
+			write(node.name());
+			write("() : ");
 			node.type().accept(this);
-			write(" ");
+			writeLine();
+			if (node.isAbstract()) {
+				writeIndentedLine("{ throw \"abstract\"; }");
+			} else {
+				node.getter().accept(this);
+			}
 		}
+
+		if (node.setter() != null) {
+			write("private function __set");
+			write(node.name());
+			write("(value : ");
+			node.type().accept(this);
+			writeLine(") : Void");
+			if (node.isAbstract()) {
+				writeIndentedLine("{ throw \"abstract\"; }");
+			} else {
+				node.setter().accept(this);
+			}
+		}
+
+		writeMetaMemberHeader(node);
+		write(" var ");
+		writeLine(node.name());
+		write("(");
+		if (node.getter() == null) {
+			write("never");
+		} else {
+			write("__get");
+			write(node.name());
+		}
+		write(",");
+		if (node.setter() == null) {
+			write("never");
+		} else {
+			write("__set");
+			write(node.name());
+		}
+		write(")");
+		write(" : ");
+		node.type().accept(this);
+		write(" ");
 	}
 
 	private void writeMemberHeader(CSMember node) {
