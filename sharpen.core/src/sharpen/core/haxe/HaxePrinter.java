@@ -301,7 +301,8 @@ public class HaxePrinter extends CSVisitor {
 			
 			if(!created) {
 				writeIndentation();
-				writeVisibility(CSVisibility.Public);
+				boolean isAbstract = (node instanceof CSClass) && (((CSClass)node).modifier() == CSClassModifier.Abstract);
+				writeVisibility(isAbstract ? CSVisibility.Protected : CSVisibility.Public);
 			}
 			
 			writeLine("function new()");
