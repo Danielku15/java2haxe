@@ -982,10 +982,6 @@ public class HaxePrinter extends CSVisitor {
 		writeVisibility(node);
 	}
 
-	public void visit(CSEvent node) {
-		// TODO: i think we should ensure hxevents are not generated
-	}
-
 	private void writeMetaMemberHeader(CSMetaMember node) {
 		writeDoc(node);
 		writeAttributes(node);

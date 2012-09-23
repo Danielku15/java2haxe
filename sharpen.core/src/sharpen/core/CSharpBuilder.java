@@ -1295,11 +1295,6 @@ public class CSharpBuilder extends ASTVisitor {
 			return false;
 		}
 
-		if (isEvent(node)) {
-			processEventDeclaration(node);
-			return false;
-		}
-
 		if (isMappedToProperty(node)) {
 			processMappedPropertyDeclaration(node);
 			return false;
@@ -1612,40 +1607,35 @@ public class CSharpBuilder extends ASTVisitor {
 		return mappedTypeReference(node.getReturnType2());
 	}
 
-	private void processEventDeclaration(MethodDeclaration node) {
-		CSTypeReference eventHandlerType = new CSTypeReference(getEventHandlerTypeName(node));
-		CSEvent event = createEventFromMethod(node, eventHandlerType);
-		mapMetaMemberAttributes(node, event);
-		if (_currentType.isInterface())
-			return;
-
-		VariableDeclarationFragment field = getEventBackingField(node);
-		CSField backingField = (CSField) _currentType.getMember(field.getName().toString());
-		backingField.type(eventHandlerType);
-
-		// clean field
-		backingField.initializer(null);
-		backingField.removeModifier(CSFieldModifier.Readonly);
-
-		final CSBlock addBlock = createEventBlock(backingField, "System.Delegate.Combine");
-		String onAddMethod = getEventOnAddMethod(node);
-		if (onAddMethod != null) {
-			addBlock.addStatement(new CSMethodInvocationExpression(new CSReferenceExpression(onAddMethod)));
-		}
-		event.setAddBlock(addBlock);
-		event.setRemoveBlock(createEventBlock(backingField, "System.Delegate.Remove"));
-	}
+//	private void processEventDeclaration(MethodDeclaration node) {
+//		CSTypeReference eventHandlerType = new CSTypeReference(getEventHandlerTypeName(node));
+//		CSEvent event = createEventFromMethod(node, eventHandlerType);
+//		mapMetaMemberAttributes(node, event);
+//		if (_currentType.isInterface())
+//			return;
+//
+//		VariableDeclarationFragment field = getEventBackingField(node);
+//		CSField backingField = (CSField) _currentType.getMember(field.getName().toString());
+//		backingField.type(eventHandlerType);
+//
+//		// clean field
+//		backingField.initializer(null);
+//		backingField.removeModifier(CSFieldModifier.Readonly);
+//
+//		final CSBlock addBlock = createEventBlock(backingField, "System.Delegate.Combine");
+//		String onAddMethod = getEventOnAddMethod(node);
+//		if (onAddMethod != null) {
+//			addBlock.addStatement(new CSMethodInvocationExpression(new CSReferenceExpression(onAddMethod)));
+//		}
+//		event.setAddBlock(addBlock);
+//		event.setRemoveBlock(createEventBlock(backingField, "System.Delegate.Remove"));
+//	}
 
 	private String getEventOnAddMethod(MethodDeclaration node) {
 		final TagElement onAddTag = javadocTagFor(node, SharpenAnnotations.SHARPEN_EVENT_ON_ADD);
 		if (null == onAddTag)
 			return null;
 		return methodName(JavadocUtility.singleTextFragmentFrom(onAddTag));
-	}
-
-	private String getEventHandlerTypeName(MethodDeclaration node) {
-		final String eventArgsType = getEventArgsType(node);
-		return buildEventHandlerTypeName(node, eventArgsType);
 	}
 
 	private void mapMetaMemberAttributes(MethodDeclaration node, CSMetaMember metaMember) {
@@ -1706,13 +1696,6 @@ public class CSharpBuilder extends ASTVisitor {
 		return findDeclaringNode(finder.field);
 	}
 
-	private CSEvent createEventFromMethod(MethodDeclaration node, CSTypeReference eventHandlerType) {
-		String eventName = methodName(node);
-		CSEvent event = new CSEvent(eventName, eventHandlerType);
-		_currentType.addMember(event);
-		return event;
-	}
-
 	private String methodName(MethodDeclaration node) {
 		return methodName(node.getName().toString());
 	}
@@ -1731,17 +1714,6 @@ public class CSharpBuilder extends ASTVisitor {
 		}
 
 		return "System.EventHandler<" + eventArgsTypeName + ">";
-	}
-
-	private String getEventArgsType(MethodDeclaration node) {
-		TagElement tag = eventTagFor(node);
-		if (null == tag)
-			return null;
-		return mappedTypeName(JavadocUtility.singleTextFragmentFrom(tag));
-	}
-
-	private TagElement eventTagFor(MethodDeclaration node) {
-		return effectiveAnnotationFor(node, SharpenAnnotations.SHARPEN_EVENT);
 	}
 
 	private TagElement effectiveAnnotationFor(MethodDeclaration node, final String annotation) {
@@ -2707,11 +2679,6 @@ public class CSharpBuilder extends ASTVisitor {
 			return;
 		}
 
-		if (isEventSubscription(node)) {
-			processEventSubscription(node);
-			return;
-		}
-
 		if (isRemovedMethodInvocation(node)) {
 			processRemovedInvocation(node);
 			return;
@@ -2901,17 +2868,6 @@ public class CSharpBuilder extends ASTVisitor {
 	
 	private boolean isClassLiteral(Expression arg) {
 		return arg.getNodeType() == ASTNode.TYPE_LITERAL;
-	}
-
-	private void processEventSubscription(MethodInvocation node) {
-
-		final MethodDeclaration addListener = declaringNode(node.resolveMethodBinding());
-		assertValidEventAddListener(node, addListener);
-
-		final MethodInvocation eventInvocation = (MethodInvocation) node.getExpression();
-
-		final MethodDeclaration eventDeclaration = declaringNode(eventInvocation.resolveMethodBinding());
-		mapEventSubscription(node, getEventArgsType(eventDeclaration), getEventHandlerTypeName(eventDeclaration));
 	}
 
 	private void mapEventSubscription(MethodInvocation node, final String eventArgsType, final String eventHandlerType) {
@@ -3680,10 +3636,6 @@ public class CSharpBuilder extends ASTVisitor {
 
 	private String qualifiedName(IMethodBinding actual) {
 		return BindingUtils.qualifiedName(actual);
-	}
-
-	private boolean isEvent(MethodDeclaration declaring) {
-		return eventTagFor(declaring) != null;
 	}
 
 	private boolean isMappedToProperty(MethodDeclaration original) {

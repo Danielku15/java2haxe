@@ -195,9 +195,6 @@ public class CSVisitor {
 	public void visit(CSUncheckedExpression node) {
 	}
 
-	public void visit(CSEvent node) {		
-	}
-
 	public void visit(CSDelegate node) {
 	}
 
