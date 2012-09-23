@@ -1607,50 +1607,10 @@ public class CSharpBuilder extends ASTVisitor {
 		return mappedTypeReference(node.getReturnType2());
 	}
 
-//	private void processEventDeclaration(MethodDeclaration node) {
-//		CSTypeReference eventHandlerType = new CSTypeReference(getEventHandlerTypeName(node));
-//		CSEvent event = createEventFromMethod(node, eventHandlerType);
-//		mapMetaMemberAttributes(node, event);
-//		if (_currentType.isInterface())
-//			return;
-//
-//		VariableDeclarationFragment field = getEventBackingField(node);
-//		CSField backingField = (CSField) _currentType.getMember(field.getName().toString());
-//		backingField.type(eventHandlerType);
-//
-//		// clean field
-//		backingField.initializer(null);
-//		backingField.removeModifier(CSFieldModifier.Readonly);
-//
-//		final CSBlock addBlock = createEventBlock(backingField, "System.Delegate.Combine");
-//		String onAddMethod = getEventOnAddMethod(node);
-//		if (onAddMethod != null) {
-//			addBlock.addStatement(new CSMethodInvocationExpression(new CSReferenceExpression(onAddMethod)));
-//		}
-//		event.setAddBlock(addBlock);
-//		event.setRemoveBlock(createEventBlock(backingField, "System.Delegate.Remove"));
-//	}
-
-	private String getEventOnAddMethod(MethodDeclaration node) {
-		final TagElement onAddTag = javadocTagFor(node, SharpenAnnotations.SHARPEN_EVENT_ON_ADD);
-		if (null == onAddTag)
-			return null;
-		return methodName(JavadocUtility.singleTextFragmentFrom(onAddTag));
-	}
-
 	private void mapMetaMemberAttributes(MethodDeclaration node, CSMetaMember metaMember) {
 		mapVisibility(node, metaMember);
 		metaMember.modifier(mapMethodModifier(node));
 		mapDocumentation(node, metaMember);
-	}
-
-	private CSBlock createEventBlock(CSField backingField, String delegateMethod) {
-		CSBlock block = new CSBlock();
-		block.addStatement(new CSInfixExpression("=", new CSReferenceExpression(backingField.name()),
-		        new CSCastExpression(backingField.type(), new CSMethodInvocationExpression(new CSReferenceExpression(
-		                delegateMethod), new CSReferenceExpression(backingField.name()), new CSReferenceExpression(
-		                "value")))));
-		return block;
 	}
 
 	private static final class CheckVariableUseVisitor extends ASTVisitor {
@@ -1678,26 +1638,6 @@ public class CSharpBuilder extends ASTVisitor {
 		public boolean used() {
 			return _used;
 		}
-	}
-
-	private static final class FieldAccessFinder extends ASTVisitor {
-		public IBinding field;
-
-		@Override
-		public boolean visit(SimpleName node) {
-			field = node.resolveBinding();
-			return false;
-		}
-	}
-
-	private VariableDeclarationFragment getEventBackingField(MethodDeclaration node) {
-		FieldAccessFinder finder = new FieldAccessFinder();
-		node.accept(finder);
-		return findDeclaringNode(finder.field);
-	}
-
-	private String methodName(MethodDeclaration node) {
-		return methodName(node.getName().toString());
 	}
 
 	private String unqualifiedName(String typeName) {
@@ -2657,14 +2597,6 @@ public class CSharpBuilder extends ASTVisitor {
 		return mapping;
 	}
 
-	private boolean isTaggedMethod(final IMethodBinding binding, final String tag) {
-	    final MethodDeclaration declaration = declaringNode(binding);
-		if (null == declaration) {
-			return false;
-		}
-		return isTaggedDeclaration(declaration, tag);
-    }
-
 	private IMethodBinding originalMethodBinding(IMethodBinding binding) {
 		IMethodBinding original = BindingUtils.findMethodDefininition(binding, my(CompilationUnit.class).getAST());
 		if (null != original)
@@ -2910,34 +2842,8 @@ public class CSharpBuilder extends ASTVisitor {
 		return listenerType.getDeclaredMethods()[0];
 	}
 
-	private void assertValidEventAddListener(ASTNode source, MethodDeclaration addListener) {
-		if (isValidEventAddListener(addListener))
-			return;
-
-		unsupportedConstruct(source, SharpenAnnotations.SHARPEN_EVENT_ADD + " must take lone single method interface argument");
-	}
-
-	private boolean isValidEventAddListener(MethodDeclaration addListener) {
-		if (1 != addListener.parameters().size())
-			return false;
-
-		final ITypeBinding type = getFirstParameterType(addListener);
-		if (!type.isInterface())
-			return false;
-
-		return type.getDeclaredMethods().length == 1;
-	}
-
-	private ITypeBinding getFirstParameterType(MethodDeclaration addListener) {
-		return parameter(addListener, 0).getType().resolveBinding();
-	}
-
 	private SingleVariableDeclaration parameter(MethodDeclaration method, final int index) {
 		return (SingleVariableDeclaration) method.parameters().get(index);
-	}
-
-	private boolean isEventSubscription(MethodInvocation node) {
-		return isTaggedMethodInvocation(node, SharpenAnnotations.SHARPEN_EVENT_ADD);
 	}
 
 	private boolean isMappedEventSubscription(MethodInvocation node) {
@@ -3023,42 +2929,6 @@ public class CSharpBuilder extends ASTVisitor {
 		mapArguments(mie, arguments);
 		adjustJUnitArguments(mie, node);
 		pushExpression(mie);
-	}
-
-	private void processIndexerInvocation(MethodInvocation node, IMethodBinding binding, MemberMapping mapping) {
-		if (node.arguments().size() == 1) {
-			processIndexerGetter(node);
-		} else {
-			processIndexerSetter(node);
-		}
-	}
-
-	private void processIndexerSetter(MethodInvocation node) {
-		// target(arg0 ... argN) => target[arg0... argN-1] = argN;
-		
-		final CSIndexedExpression indexer = new CSIndexedExpression(mapIndexerTarget(node));
-		final List arguments = node.arguments();
-		final Expression lastArgument = (Expression)arguments.get(arguments.size() - 1);
-		for (int i=0; i<arguments.size()-1; ++i) {
-			indexer.addIndex(mapExpression((Expression) arguments.get(i)));
-		}
-		pushExpression(CSharpCode.newAssignment(indexer, mapExpression(lastArgument)));
-		
-    }
-
-	private void processIndexerGetter(MethodInvocation node) {
-	    final Expression singleArgument = (Expression) node.arguments().get(0);
-	    pushExpression(
-	    		new CSIndexedExpression(
-	    				mapIndexerTarget(node),
-	    				mapExpression(singleArgument)));
-    }
-
-	private CSExpression mapIndexerTarget(MethodInvocation node) {
-		if (node.getExpression() == null) {
-			return new CSThisExpression();
-		}
-		return mapMethodTargetExpression(node);
 	}
 
 	private CSExpression parensIfNeeded(CSExpression expression) {
