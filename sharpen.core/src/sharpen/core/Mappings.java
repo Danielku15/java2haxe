@@ -4,6 +4,7 @@ package sharpen.core;
 import org.eclipse.jdt.core.dom.*;
 
 import sharpen.core.Configuration.*;
+import sharpen.core.csharp.ast.CSExpression;
 
 public interface Mappings {
 
@@ -18,4 +19,6 @@ public interface Mappings {
 	String currentNamespace();
 	
 	void currentNamespace(String currentNamespace);
+
+	String constructorMethod(ITypeBinding type, IMethodBinding ctor);
 }

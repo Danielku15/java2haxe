@@ -26,6 +26,7 @@ public class CSConstructor extends CSMethodBase {
 	private CSConstructorInvocationExpression _chainedConstructorInvocation;
 	
 	private CSConstructorModifier _modifier;
+	private String _constructorMethod;
 
 	public CSConstructor() {
 		this(CSConstructorModifier.None);
@@ -60,4 +61,12 @@ public class CSConstructor extends CSMethodBase {
 	public boolean isStatic() {
 		return _modifier == CSConstructorModifier.Static;
 	}	
+	
+	public String constructorMethod() {
+		return _constructorMethod;
+	}
+	
+	public void constructorMethod(String constructorMethod) {
+		_constructorMethod = constructorMethod;
+	}
 }

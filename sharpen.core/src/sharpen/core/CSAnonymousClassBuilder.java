@@ -24,6 +24,7 @@ package sharpen.core;
 import java.util.*;
 
 import sharpen.core.csharp.ast.*;
+import sharpen.core.framework.Environments;
 
 import org.eclipse.jdt.core.dom.*;
 
@@ -215,7 +216,12 @@ public class CSAnonymousClassBuilder extends AbstractNestedClassBuilder {
 		type.visibility(CSVisibility.Private);
 		ITypeBinding bt = anonymousBaseType();
 		CSTypeReference tref = new CSTypeReference(anonymousBaseTypeName()); 
-		type.addBaseType(tref);
+		if(bt.isClass()) {
+			type.baseType(tref);
+		}
+		else {
+			type.addInterface(tref); 
+		}
 		for (ITypeBinding arg : bt.getTypeArguments()) {
 			tref.addTypeArgument(mappedTypeReference(arg));
 		}
@@ -228,6 +234,7 @@ public class CSAnonymousClassBuilder extends AbstractNestedClassBuilder {
 	private void setUpConstructor() {
 		_constructor = new CSConstructor();
 		_constructor.visibility(CSVisibility.Public);
+		_constructor.constructorMethod(Environments.my(Mappings.class).constructorMethod(_node.resolveBinding(), null));
 		_type.addMember(_constructor);
 	}
 	

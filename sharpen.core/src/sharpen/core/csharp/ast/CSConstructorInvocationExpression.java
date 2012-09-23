@@ -23,8 +23,19 @@ package sharpen.core.csharp.ast;
 
 public class CSConstructorInvocationExpression extends CSMethodInvocationExpression {
 
+	private String _constructorMethod;
+
 	public CSConstructorInvocationExpression(CSExpression expression) {
 		super(expression);
+	}
+	
+	public CSConstructorInvocationExpression(CSExpression expression, String constructorMethod) {
+		super(expression);
+		_constructorMethod = constructorMethod;
+	}
+	
+	public String constructorMethod() {
+		return _constructorMethod;
 	}
 
 	public void accept(CSVisitor visitor) {

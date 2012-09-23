@@ -29,8 +29,7 @@ public class DefaultConfiguration extends Configuration {
 		setUpAnnotationMappings();
 	
 		mapType("java.lang.System", runtimeTypeName);
-		mapType("java.lang.Math", "System.Math");
-		mapMethod("java.lang.System.exit", "System.Environment.Exit");
+		mapType("java.lang.Math", "haxen.Math");
 		
 		setUpIoMappings();
 	
@@ -38,130 +37,101 @@ public class DefaultConfiguration extends Configuration {
 	    
 	    setUpCollectionMappings();
 	    
-	    mapType("java.lang.Cloneable", "System.ICloneable");
+	    mapType("java.lang.Cloneable", "haxen.ICloneable");
 	    
-	    mapType("java.util.Date", "System.DateTime");
+	    mapType("java.util.Date", "haxen.util.Date");
 	
-	    mapMethod("java.lang.Object.toString", "ToString");
-	    mapMethod("java.lang.Object.hashCode", "GetHashCode");
-	    mapMethod("java.lang.Object.equals", "Equals");
+	    mapMethod("java.lang.Object.hashCode", "hashCode");
+	    mapMethod("java.lang.Object.equals", "equals");
 	    
-	    mapMethod("java.lang.Float.isNaN", "float.IsNaN");
-	    mapMethod("java.lang.Double.isNaN", "double.IsNaN");
+	    mapMethod("java.lang.Float.isNaN", "Math.isNaN");
+	    mapMethod("java.lang.Double.isNaN", "Math.isNaN");
 	    
 	    setUpStringMappings();
 	
 	    mapMethod("java.lang.Throwable.printStackTrace", runtimeMethod("printStackTrace"));
 	    
-	    mapMethod("java.lang.System.arraycopy", "System.Array.Copy");
+	    mapMethod("java.lang.System.arraycopy", runtimeMethod("arrayCopy"));
 	    mapMethod("java.lang.Object.wait", runtimeMethod("wait"));
 	    mapMethod("java.lang.Object.notify", runtimeMethod("notify"));
 	    mapMethod("java.lang.Object.notifyAll", runtimeMethod("notifyAll"));
 	    mapMethod("java.lang.Object.getClass", runtimeMethod("getClassForObject"));		
 	
-	    mapMethod("length", "Length");	// see qualifiedName(IVariableBinding)
 		setUpPrimitiveWrappers();		
 	}
 	
 	private void setUpPrimitiveMappings() {
-		mapType("boolean", "bool");
-		mapPrimitive("void");
-		mapPrimitive("char");
-		mapPrimitive("byte");		
-		mapPrimitive("short");
-		mapPrimitive("int");
-		mapPrimitive("long");
-		mapPrimitive("float");
-		mapPrimitive("double");
-		mapType("ubyte", "byte");
+		mapType("boolean", "Bool");
+		mapType("void", "Void");
+		mapType("char", "Char");
+		mapType("byte", "Byte");
+		mapType("short", "Short");
+		mapType("int", "Int");
+		mapType("long", "Long");
+		mapType("float", "Float");
+		mapType("double", "Double");
 		
-		mapType("java.lang.Object", "object");
-		mapType("java.lang.String", "string");
-		mapType("java.lang.Character", "char");
-		mapType("java.lang.Byte", "byte");
-		mapType("java.lang.Boolean", "bool");
-		mapType("java.lang.Short", "short");
-		mapType("java.lang.Integer", "int");
-		mapType("java.lang.Long", "long");
-		mapType("java.lang.Float", "float");
-		mapType("java.lang.Double", "double");
+		mapType("java.lang.Object", "haxen.Object");
+		mapType("java.lang.String", "String");
+		mapType("java.lang.Character", "haxen.Char");
+		mapType("java.lang.Byte", "haxen.Byte");
+		mapType("java.lang.Boolean", "haxen.Bool");
+		mapType("java.lang.Short", "haxen.Short");
+		mapType("java.lang.Integer", "haxen.Int");
+		mapType("java.lang.Long", "haxen.Long");
+		mapType("java.lang.Float", "haxen.Float");
+		mapType("java.lang.Double", "haxen.Double");
 	}
 	
 	private void setUpCollectionMappings() {
 		// collection framework
-	    mapType("java.util.Collection", "System.Collections.ICollection");
-	    mapType("java.util.Collection<>", "System.Collections.Generic.ICollection");
-	    mapType("java.util.Set<>", "System.Collections.Generic.ICollection");
+	    mapType("java.util.Collection", "haxen.collections.ICollection");
+	    mapType("java.util.Collection<>", "haxen.collections.generic.ICollection");
+	    mapType("java.util.Set<>", "haxen.collections.generic.ICollection");
 	    if (mapIteratorToEnumerator()) {
-	    	mapType("java.util.Iterator", "System.Collections.IEnumerator");
-	    	mapType("java.util.Iterator<>", "System.Collections.Generic.IEnumerator");
-	    	mapType("java.lang.Iterable", "System.Collections.IEnumerable");
-	    	mapType("java.lang.Iterable<>", "System.Collections.Generic.IEnumerable");
+	    	mapType("java.util.Iterator", "haxen.collections.IEnumerator");
+	    	mapType("java.util.Iterator<>", "haxen.collections.generic.IEnumerator");
+	    	mapType("java.lang.Iterable", "haxen.collections.IEnumerable");
+	    	mapType("java.lang.Iterable<>", "haxen.collections.generic.IEnumerable");
 	    }
-	    mapType("java.util.Map", "System.Collections.IDictionary");
-	    mapType("java.util.Map<,>", "System.Collections.Generic.IDictionary");
-	    mapType("java.util.Map.Entry", "System.Collections.DictionaryEntry");
-	    mapType("java.util.Map.Entry<,>", "System.Collections.Generic.KeyValuePair");
-	    mapType("java.util.HashMap", "System.Collections.Hashtable");
-	    mapType("java.util.HashMap<,>", "System.Collections.Generic.Dictionary");
-	    mapType("java.util.TreeMap", "System.Collections.SortedList");
-	    mapType("java.util.TreeMap<,>", "System.Collections.Generic.SortedDictionary");	    
-	    mapType("java.util.SortedMap<,>", "System.Collections.Generic.SortedDictionary");	    
-	    mapType("java.util.List", "System.Collections.IList");
-	    mapType("java.util.List<>", "System.Collections.Generic.IList");
-	    mapType("java.util.ArrayList", "System.Collections.ArrayList");
-	    mapType("java.util.ArrayList<>", "System.Collections.Generic.List");
-	    mapType("java.util.LinkedList", "System.Collections.ArrayList");
-	    mapType("java.util.LinkedList<>", "System.Collections.Generic.LinkedList");
-	    mapType("java.util.Stack", "System.Collections.Stack");	    
+	    mapType("java.util.Map", "haxen.collections.IMap");
+	    mapType("java.util.Map<,>", "haxen.collections.generic.IMap");
+	    mapType("java.util.Map.Entry", "haxen.collections.MapEntry");
+	    mapType("java.util.Map.Entry<,>", "haxen.collections.generic.MapEntry");
+	    mapType("java.util.HashMap", "haxen.collections.HashMap");
+	    mapType("java.util.HashMap<,>", "haxen.collections.generic.HashMap");
+	    mapType("java.util.TreeMap", "haxen.collections.TreeMap");
+	    mapType("java.util.TreeMap<,>", "haxen.collections.generic.TreeMap");	    
+	    mapType("java.util.SortedMap<,>", "haxen.collections.generic.SortedMap");	    
+	    mapType("java.util.List", "haxen.collections.IList");
+	    mapType("java.util.List<>", "haxen.collections.generic.IList");
+	    mapType("java.util.ArrayList", "haxen.collections.ArrayList");
+	    mapType("java.util.ArrayList<>", "haxen.collections.generic.ArrayList");
+	    mapType("java.util.LinkedList", "haxen.collections.LinkedList");
+	    mapType("java.util.LinkedList<>", "haxen.collections.generic.LinkedList");
+	    mapType("java.util.Stack", "haxen.collections.Stack");	    
 	    
-	    mapProperty("java.util.LinkedList<>.getFirst", "First");
-	    
-	    mapType("java.util.Comparator", "System.Collections.IComparer");
-	    mapMethod("java.util.Collections.sort", "Sort");
-	    
-	    mapProperty("java.util.Collection.size", "Count");
-	    mapProperty("java.util.Map.size", "Count");
-	    
-	    mapProperty("java.util.List.size", "Count");
-	    mapIndexer("java.util.List.get");
-	    mapMethod("java.util.Collection.addAll", collectionRuntimeMethod("AddAll"));
-	    mapMethod("java.util.Collection.toArray", collectionRuntimeMethod("ToArray"));
+	    mapType("java.util.Comparator", "haxen.collections.IComparator");
 	    
 	    if (mapIteratorToEnumerator()) {
-	    	mapMethod("java.lang.Iterable.iterator", "GetEnumerator");
-	    	mapMethod("java.util.Collection.iterator", "GetEnumerator");
-	    	mapMethod("java.util.List.iterator", "GetEnumerator");
-	    	mapMethod("java.util.Set.iterator", "GetEnumerator");
-	    	mapMethod("java.util.Iterator.hasNext", "MoveNext");
-	    	mapProperty("java.util.Iterator.next", "Current");
+	    	mapMethod("java.lang.Iterable.iterator", "getEnumerator");
+	    	mapMethod("java.util.Collection.iterator", "getEnumerator");
+	    	mapMethod("java.util.List.iterator", "getEnumerator");
+	    	mapMethod("java.util.Set.iterator", "getEnumerator");
 	    }
-	    mapMethod("java.util.Map.remove", collectionRuntimeMethod("Remove"));
-	    mapProperty("java.util.Map.Entry.getKey", "Key");
-	    mapProperty("java.util.Map.Entry.getValue", "Value");
-	    mapProperty("java.util.Map.values", "Values");
-	    mapProperty("java.util.Map.keySet", "Keys");
-	    mapIndexer("java.util.Dictionary.get");
 	    
 	    //  jdk 1.0 collection framework
-	    mapType("java.util.Vector", "System.Collections.ArrayList");
-	    mapType("java.util.Enumeration", "System.Collections.IEnumerator");
+	    mapType("java.util.Vector", "haxen.collections.ArrayList");
+	    mapType("java.util.Enumeration", "haxen.collections.IEnumerator");
 	    mapProperty("java.util.Vector.size", "Count");
 	    // converter thinks size belong to AbstractCollection on jdk 6
-	    mapProperty("java.util.AbstractCollection.size", "Count");
-	    mapMethod("java.util.Vector.addElement", "Add");
-	    mapIndexer("java.util.Vector.elementAt");
-	    mapMethod("java.util.Vector.elements", "GetEnumerator");
-	    mapMethod("java.util.Vector.copyInto", "CopyTo");
-	    mapMethod("java.util.Vector.removeAllElements", "Clear");
-	    mapMethod("java.util.Enumeration.hasMoreElements", "MoveNext");
-	    mapProperty("java.util.Enumeration.nextElement", "Current");
+	    mapMethod("java.util.Vector.elements", "getEnumerator");
+	    mapMethod("java.util.Vector.copyInto", "copyTo");
+	    mapMethod("java.util.Vector.removeAllElements", "clear");
 	    
-	    mapType("java.util.Hashtable", "System.Collections.Hashtable");
-	    mapProperty("java.util.Dictionary.keys", "Keys");
-	    mapProperty("java.util.Dictionary.size", "Count");
+	    mapType("java.util.Hashtable", "haxen.collections.Hashtable");
 	    
-		// JUnit
+		/*// JUnit
 		mapNamespace("junit.framework", "NUnit.Framework");
 		mapMethod("junit.framework.Assert.assertEquals", "NUnit.Framework.Assert.AreEqual");
 		mapMethod("junit.framework.Assert.assertTrue", "NUnit.Framework.Assert.IsTrue");
@@ -183,77 +153,56 @@ public class DefaultConfiguration extends Configuration {
 		mapMethod("org.junit.Assert.fail", "NUnit.Framework.Assert.Fail");
 		mapType("org.junit.Assert", "NUnit.Framework.Assert");
 		mapType("org.junit.Before", "NUnit.Framework.SetUp");
-		mapType("org.junit.After", "NUnit.Framework.TearDown");
+		mapType("org.junit.After", "NUnit.Framework.TearDown");*/
 	}
 	
 	private void setUpExceptionMappings() {
-		mapType("java.lang.Throwable", "System.Exception");
-		mapProperty("java.lang.Throwable.getMessage", "Message");
-		mapProperty("java.lang.Throwable.getCause", "InnerException");
-		mapType("java.lang.Error", "System.Exception");
-		mapType("java.lang.OutOfMemoryError", "System.OutOfMemoryException");
-		mapType("java.lang.Exception", "System.Exception");
-		mapType("java.lang.RuntimeException", "System.Exception");
-		mapType("java.lang.ClassCastException", "System.InvalidCastException");
-		mapType("java.lang.NullPointerException", "System.ArgumentNullException");
-		mapType("java.lang.IllegalArgumentException", "System.ArgumentException");
-		mapType("java.lang.IllegalStateException", "System.InvalidOperationException");
-		mapType("java.lang.InterruptedException", "System.Exception");
-	    mapType("java.lang.IndexOutOfBoundsException", "System.IndexOutOfRangeException");
-	    mapType("java.lang.UnsupportedOperationException", "System.NotSupportedException");
-	    mapType("java.lang.ArrayIndexOutOfBoundsException", "System.IndexOutOfRangeException");
-	    mapType("java.lang.NoSuchMethodError", "System.MissingMethodException");
-	    mapType("java.io.IOException", "System.IO.IOException");
-	    mapType("java.net.SocketException", "System.Net.Sockets.SocketException");
-	    mapType("java.lang.SecurityException", "System.Security.SecurityException");
+		mapType("java.lang.Throwable", "haxen.Exception");
+		mapType("java.lang.Error", "haxen.Exception");
+		mapType("java.lang.Exception", "haxen.Exception");
+		mapType("java.lang.RuntimeException", "haxen.Exception");
+		mapType("java.lang.ClassCastException", "haxen.ClassCastException");
+		mapType("java.lang.NullPointerException", "haxen.NullPointerException");
+		mapType("java.lang.IllegalArgumentException", "haxen.ArgumentException");
+		mapType("java.lang.IllegalStateException", "haxen.InvalidOperationException");
+		mapType("java.lang.InterruptedException", "haxen.Exception");
+	    mapType("java.lang.IndexOutOfBoundsException", "haxen.IndexOutOfRangeException");
+	    mapType("java.lang.UnsupportedOperationException", "haxen.NotSupportedException");
+	    mapType("java.lang.ArrayIndexOutOfBoundsException", "haxen.IndexOutOfRangeException");
+	    mapType("java.lang.NoSuchMethodError", "haxen.MissingMethodException");
+	    mapType("java.io.IOException", "haxen.io.IOException");
 	}
 	
 	private void setUpPrimitiveWrappers() {
-	    mapField("java.lang.Short.MAX_VALUE", "short.MaxValue");
-		mapField("java.lang.Short.MIN_VALUE", "short.MinValue");
-		mapField("java.lang.Integer.MAX_VALUE", "int.MaxValue");
-		mapField("java.lang.Integer.MIN_VALUE", "int.MinValue");
-		mapField("java.lang.Long.MAX_VALUE", "long.MaxValue");
-		mapField("java.lang.Long.MIN_VALUE", "long.MinValue");
-		mapField("java.lang.Float.MAX_VALUE", "float.MaxValue");
-		mapField("java.lang.Float.MIN_VALUE", "float.MinValue");
-		mapField("java.lang.Float.POSITIVE_INFINITY", "float.PositiveInfinity");
-		mapField("java.lang.Float.NEGATIVE_INFINITY", "float.NegativeInfinity");
-		mapField("java.lang.Double.MAX_VALUE", "double.MaxValue");
-		mapField("java.lang.Double.MIN_VALUE", "double.MinValue");
-		mapField("java.lang.Double.NEGATIVE_INFINITY", "double.NegativeInfinity");
-		mapField("java.lang.Double.POSITIVE_INFINITY", "double.PositiveInfinity");
+	    mapField("java.lang.Short.MAX_VALUE", "haxen.Short.MAX_VALUE");
+		mapField("java.lang.Short.MIN_VALUE", "haxen.Short.MIN_VALUE");
+		mapField("java.lang.Integer.MAX_VALUE", "haxen.Integer.MAX_VALUE");
+		mapField("java.lang.Integer.MIN_VALUE", "haxen.Integer.MIN_VALUE");
+		mapField("java.lang.Long.MAX_VALUE", "haxen.Long.MAX_VALUE");
+		mapField("java.lang.Long.MIN_VALUE", "haxen.Long.MIN_VALUE");
+		mapField("java.lang.Float.MAX_VALUE", "haxen.Float.MAX_VALUE");
+		mapField("java.lang.Float.MIN_VALUE", "haxen.Float.MIN_VALUE");
+		mapField("java.lang.Float.POSITIVE_INFINITY", "haxen.Float.POSITIVE_INFINITY");
+		mapField("java.lang.Float.NEGATIVE_INFINITY", "haxen.Float.NEGATIVE_INFINITY");
+		mapField("java.lang.Double.MAX_VALUE", "haxen.Double.MAX_VALUE");
+		mapField("java.lang.Double.MIN_VALUE", "haxen.Double.MIN_VALUE");
+		mapField("java.lang.Double.NEGATIVE_INFINITY", "haxen.Double.NEGATIVE_INFINITY");
+		mapField("java.lang.Double.POSITIVE_INFINITY", "haxen.Double.POSITIVE_INFINITY");
 		mapField("java.lang.Boolean.TRUE", "true");
 		mapField("java.lang.Boolean.FALSE", "false");
-		mapField("java.lang.Byte.MAX_VALUE", "byte.MaxValue");
-		mapField("java.lang.Byte.MIN_VALUE", "byte.MinValue");
-		mapField("java.lang.Character.MAX_VALUE", "char.MaxValue");
-		mapField("java.lang.Character.MIN_VALUE", "char.MinValue");
-		mapMethod("java.lang.Character.isWhitespace", "char.IsWhiteSpace");
+		mapField("java.lang.Byte.MAX_VALUE", "haxen.Byte.MAX_VALUE");
+		mapField("java.lang.Byte.MIN_VALUE", "haxen.Byte.MIN_VALUE");
+		mapField("java.lang.Character.MAX_VALUE", "haxen.Character.MAX_VALUE");
+		mapField("java.lang.Character.MIN_VALUE", "haxen.Character.MIN_VALUE");
 		
-		mapWrapperConstructor("java.lang.Boolean.Boolean", "System.Convert.ToBoolean", "boolean");
-		mapWrapperConstructor("java.lang.Byte.Byte", "System.Convert.ToByte", "byte");
-		mapWrapperConstructor("java.lang.Character.Character", "System.Convert.ToChar", "char");
-		mapWrapperConstructor("java.lang.Short.Short", "System.Convert.ToInt16", "short");
-		mapWrapperConstructor("java.lang.Integer.Integer", "System.Convert.ToInt32", "int");
-		mapWrapperConstructor("java.lang.Long.Long", "System.Convert.ToInt64", "long");
-		mapWrapperConstructor("java.lang.Float.Float", "System.Convert.ToSingle", "float");
-		mapWrapperConstructor("java.lang.Double.Double", "System.Convert.ToDouble", "double");
-		
-		mapMethod("java.lang.Long.toString", "System.Convert.ToString");
-		mapMethod("java.lang.Long.parseLong", "long.Parse");
-		mapMethod("java.lang.Integer.valueOf", "int.Parse");
-		mapMethod("java.lang.Integer.parseInt", "System.Convert.ToInt32");
-		mapMethod("java.lang.Number.shortValue", "");
-		mapMethod("java.lang.Number.intValue", "");
-		mapMethod("java.lang.Number.longValue", "");
-		mapMethod("java.lang.Number.byteValue", "");
-		mapMethod("java.lang.Number.floatValue", "");
-		mapMethod("java.lang.Number.doubleValue", "");
-		mapMethod("java.lang.Character.charValue", "");
-		mapMethod("java.lang.Boolean.booleanValue", "");
-		mapMethod("java.lang.Float.floatToIntBits", runtimeMethod("floatToIntBits"));
-		mapMethod("java.lang.Float.intBitsToFloat", runtimeMethod("intBitsToFloat"));
+		mapWrapperConstructor("java.lang.Boolean.Boolean", "haxen.Convert.toBoolean", "Bool");
+		mapWrapperConstructor("java.lang.Byte.Byte", "haxen.Convert.toByte", "Byte");
+		mapWrapperConstructor("java.lang.Character.Character", "haxen.Convert.toChar", "Char");
+		mapWrapperConstructor("java.lang.Short.Short", "haxen.Convert.toInt16", "Short");
+		mapWrapperConstructor("java.lang.Integer.Integer", "haxen.Convert.toInt32", "Int");
+		mapWrapperConstructor("java.lang.Long.Long", "haxen.Convert.toInt64", "Long");
+		mapWrapperConstructor("java.lang.Float.Float", "haxen.Convert.toSingle", "Float");
+		mapWrapperConstructor("java.lang.Double.Double", "haxen.Convert.toDouble", "Float");
     }	
 	
 	public boolean isIgnoredExceptionType(String exceptionType) {

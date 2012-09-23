@@ -546,7 +546,7 @@ public class CSharpBuilder extends ASTVisitor {
 	}
 
 	private boolean implementsCloneable(CSTypeDeclaration node) {
-		for (CSTypeReferenceExpression typeRef : node.baseTypes()) {
+		for (CSTypeReferenceExpression typeRef : node.interfaces()) {
 			if (typeRef.toString().equals("System.ICloneable")) {
 				return true;
 			}
@@ -666,7 +666,7 @@ public class CSharpBuilder extends ASTVisitor {
 			unresolvedTypeBinding(node.getSuperclassType());
 		
 		if (!isLegacyTestFixtureClass (superClassBinding))
-			type.addBaseType(mappedTypeReference(superClassBinding));
+			type.baseType(mappedTypeReference(superClassBinding));
 		else {
 			type.addAttribute(new CSAttribute ("NUnit.Framework.TestFixture"));
 		}
@@ -705,7 +705,7 @@ public class CSharpBuilder extends ASTVisitor {
 			return false;
 	
 		final String baseType = JavadocUtility.singleTextFragmentFrom(replaceExtendsTag);
-		type.addBaseType(new CSTypeReference(baseType));		
+		type.baseType(new CSTypeReference(baseType));		
 		return true;
 	}
 
@@ -716,7 +716,7 @@ public class CSharpBuilder extends ASTVisitor {
 			if (iface.resolveBinding() == serializable) {
 				continue;
 			}
-			type.addBaseType(mappedTypeReference(iface));
+			type.addInterface(mappedTypeReference(iface));
 		}
 
 		if (!type.isInterface() && node.resolveBinding().isSubTypeCompatible(serializable)) {
@@ -1275,6 +1275,7 @@ public class CSharpBuilder extends ASTVisitor {
 	}
 
 	private boolean isDestructor(MethodDeclaration node) {
+		warning(node, "Haxe does not support destructors, skpping destructor");
 		return node.getName().toString().equals("finalize");
 	}
 
@@ -1503,15 +1504,20 @@ public class CSharpBuilder extends ASTVisitor {
 	}
 
 	private void mapMethodParts(MethodDeclaration node, CSMethodBase method) {
-
 		_currentType.addMember(method);
-
 		method.startPosition(node.getStartPosition());
 		method.isVarArgs(node.isVarargs());
 		mapParameters(node, method);
 		mapAnnotations(node, method);
 		mapDocumentation(node, method);
 		visitBodyDeclarationBlock(node, node.getBody(), method);
+		
+		if(method instanceof CSConstructor) {
+			IMethodBinding ctor = node.resolveBinding();
+			ITypeBinding type = ctor.getDeclaringClass();
+			CSConstructor csCtor = (CSConstructor)method;
+			csCtor.constructorMethod(my(Mappings.class).constructorMethod(type, ctor));
+		}
 		
 		IMethodBinding overriden = getOverridedMethod(node);
 		if (overriden != null) {
@@ -1793,6 +1799,7 @@ public class CSharpBuilder extends ASTVisitor {
 		_currentBodyDeclaration = node;
 
 		if (Modifier.isSynchronized(node.getModifiers())) {
+			warning(node, "Haxe does not support locking, will generate normal block");
 			CSLockStatement lock = new CSLockStatement(node.getStartPosition(), getLockTarget(node));
 			targetBlock.addStatement(lock);
 			visitBlock(lock.body(), block);
@@ -1808,12 +1815,19 @@ public class CSharpBuilder extends ASTVisitor {
 	}
 
 	public boolean visit(ConstructorInvocation node) {
-		addChainedConstructorInvocation(new CSThisExpression(), node.arguments(), node.getStartPosition());
+		IMethodBinding ctor = node.resolveConstructorBinding();
+		Configuration.MemberMapping mappedConstructor = effectiveMappingFor(ctor);
+		String constructorMethod = null;
+		if (null == mappedConstructor) {
+			ITypeBinding type = ctor.getDeclaringClass();
+			constructorMethod = my(Mappings.class).constructorMethod(type, ctor);
+		}
+		addChainedConstructorInvocation(new CSThisExpression(), node.arguments(), node.getStartPosition(), constructorMethod);
 		return false;
 	}
 
-	private void addChainedConstructorInvocation(CSExpression target, List arguments, int startPosition) {
-		CSConstructorInvocationExpression cie = new CSConstructorInvocationExpression(target);
+	private void addChainedConstructorInvocation(CSExpression target, List arguments, int startPosition, String constructorMethod) {
+		CSConstructorInvocationExpression cie = new CSConstructorInvocationExpression(target,constructorMethod);
 		mapArguments(cie, arguments);
 		addStatement(new CSExpressionStatement(startPosition, cie));
 	}
@@ -1822,7 +1836,14 @@ public class CSharpBuilder extends ASTVisitor {
 		if (null != node.getExpression()) {
 			notImplemented(node);
 		}
-		addChainedConstructorInvocation(new CSBaseExpression(), node.arguments(), node.getStartPosition());
+		IMethodBinding ctor = node.resolveConstructorBinding();
+		Configuration.MemberMapping mappedConstructor = effectiveMappingFor(ctor);
+		String constructorMethod = null;
+		if (null == mappedConstructor) {
+			ITypeBinding type = ctor.getDeclaringClass();
+			constructorMethod = my(Mappings.class).constructorMethod(type, ctor);
+		}
+		addChainedConstructorInvocation(new CSBaseExpression(), node.arguments(), node.getStartPosition(), constructorMethod);
 		return false;
 	}
 
@@ -2565,9 +2586,11 @@ public class CSharpBuilder extends ASTVisitor {
 	}
 
 	private CSMethodInvocationExpression mapConstructorInvocation(ClassInstanceCreation node) {
-		Configuration.MemberMapping mappedConstructor = effectiveMappingFor(node.resolveConstructorBinding());
+		IMethodBinding ctor = node.resolveConstructorBinding();
+		Configuration.MemberMapping mappedConstructor = effectiveMappingFor(ctor);
 		if (null == mappedConstructor) {
-			return new CSConstructorInvocationExpression(mappedTypeReference(node.resolveTypeBinding()));
+			ITypeBinding type = node.resolveTypeBinding();
+			return new CSConstructorInvocationExpression(mappedTypeReference(type), my(Mappings.class).constructorMethod(type, ctor));
 		}
 		final String mappedName = mappedConstructor.name;
 		if (mappedName.length() == 0) {
@@ -2936,7 +2959,8 @@ public class CSharpBuilder extends ASTVisitor {
 
 	private void patchEventListener(CSAnonymousClassBuilder listenerBuilder, String eventArgsType) {
 		final CSClass type = listenerBuilder.type();
-		type.clearBaseTypes();
+		type.clearInterfaces();
+		type.baseType(null);
 
 		final CSMethod handlerMethod = (CSMethod) type.getMember(eventListenerMethodName(listenerBuilder));
 		handlerMethod.parameters().get(0).type(OBJECT_TYPE_REFERENCE);

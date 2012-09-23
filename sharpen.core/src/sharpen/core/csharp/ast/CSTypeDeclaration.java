@@ -27,11 +27,13 @@ public abstract class CSTypeDeclaration extends CSType implements CSTypeParamete
 	
 	protected List<CSMember> _members = new ArrayList<CSMember>();
 	
-	protected List<CSTypeReferenceExpression> _baseTypes = new ArrayList<CSTypeReferenceExpression>();
+	protected CSTypeReferenceExpression _baseType;
+	protected List<CSTypeReferenceExpression> _interfaces = new ArrayList<CSTypeReferenceExpression>();
 	
 	protected List<CSTypeParameter> _typeParameters = new ArrayList<CSTypeParameter>();
 
 	private boolean _partial;
+	private int _constructorCount;
 
 	CSTypeDeclaration(String name) {
 		super(name);
@@ -48,6 +50,10 @@ public abstract class CSTypeDeclaration extends CSType implements CSTypeParamete
 	public void addMember(CSMember member) {
 		_members.add(member);
 	}
+	
+	public int constructorCount() {
+		return _constructorCount;
+	}
 
 	public List<CSMember> members() {
 		return Collections.unmodifiableList(_members);
@@ -63,16 +69,24 @@ public abstract class CSTypeDeclaration extends CSType implements CSTypeParamete
 		return Collections.unmodifiableList(ctors);
 	}
 
-	public void addBaseType(CSTypeReferenceExpression typeRef) {
-		_baseTypes.add(typeRef);
+	public void addInterface(CSTypeReferenceExpression typeRef) {
+		_interfaces.add(typeRef);
 	}
 	
-	public void clearBaseTypes() {
-		_baseTypes.clear();
+	public void clearInterfaces() {
+		_interfaces.clear();
 	}
 	
-	public List<CSTypeReferenceExpression> baseTypes() {
-		return Collections.unmodifiableList(_baseTypes);
+	public List<CSTypeReferenceExpression> interfaces() {
+		return Collections.unmodifiableList(_interfaces);
+	}
+	
+	public CSTypeReferenceExpression baseType() {
+		return _baseType;
+	}
+	
+	public void baseType(CSTypeReferenceExpression baseType) {
+		_baseType = baseType;
 	}
 
 	public void addTypeParameter(CSTypeParameter typeParameter) {

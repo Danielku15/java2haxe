@@ -23,6 +23,24 @@ public class MappingsImpl implements Mappings {
 	private final PreserveFullyQualifiedNamesState _preserveFQNState = my(PreserveFullyQualifiedNamesState.class);
 	private String _currentNamespace;
 	
+	private Map<ITypeBinding, Map<IMethodBinding, String>> _constructorMethods = new HashMap<>();
+	
+	@Override
+	public String constructorMethod(ITypeBinding type, IMethodBinding ctor) {
+		// TODO: we will need to check how to handle ctor overloading if the base class is a built in type
+		/*if(!type.isFromSource()) {
+			return null;
+		}*/
+		if(!_constructorMethods.containsKey(type)) {
+			_constructorMethods.put(type, new HashMap<IMethodBinding, String>());
+		}
+		Map<IMethodBinding, String> names = _constructorMethods.get(type);
+		if(!names.containsKey(ctor)) {
+			names.put(ctor, "__ctor" + names.size());
+		}
+		return names.get(ctor);
+	}
+
 	public String mappedFieldName(IVariableBinding binding) {
 		if (!binding.isField())
 			return null;

@@ -25,6 +25,8 @@ import java.io.*;
 import java.util.*;
 import java.util.regex.*;
 
+import org.eclipse.jdt.internal.compiler.ast.TypeReference;
+
 import sharpen.core.csharp.ast.*;
 import sharpen.core.io.*;
 
@@ -260,30 +262,58 @@ public class HaxePrinter extends CSVisitor {
 	}
 
 	private void writeBaseTypes(CSTypeDeclaration node) {
-		List<CSTypeReferenceExpression> baseTypes = node.baseTypes();
+		
+		if(node.baseType() != null) 
+		{
+			write(" extends ");
+			node.baseType().accept(this);
+		}
+		
+		List<CSTypeReferenceExpression> baseTypes = node.interfaces();
 		if (baseTypes.isEmpty()) {
 			return;
 		}
 
-		String keyword = node.isInterface() ? " implements" : " extends";
 		for (int i = 0; i < baseTypes.size(); i++) {
 			CSTypeReferenceExpression baseType = baseTypes.get(i);
-			if (i > 0) {
+			if (i > 0 || node.baseType() != null) {
 				write(",");
 			}
 
-			write(keyword);
-			write(" ");
+			write(" implements ");
 			baseType.accept(this);
-			if (i == 0) {
-				keyword = "implements";
-			}
 		}
 	}
 
 	private void writeTypeBody(CSTypeDeclaration node) {
 		writeLine();
 		enterBody();
+		// generate default constructor if needed
+		if(!node.isInterface()) {
+			boolean created = false;
+			CSConstructorInvocationExpression chained = null;
+			for (CSConstructor constructor : node.constructors()) {
+				if(constructor.parameters().isEmpty()) {
+					writeVisibility(node);
+					chained = constructor.chainedConstructorInvocation();
+			        created = true;
+					break;
+				}
+			}
+			
+			if(!created) {
+				writeIndentation();
+				writeVisibility(CSVisibility.Public);
+			}
+			
+			writeLine("function new()");
+	        enterBody();
+	        if(chained != null) {
+	        	writeIndentedLine("super();");
+	        }
+	        leaveBody();
+	        writeLine();
+		}
 		CSTypeDeclaration saved = _currentType;
 		_currentType = node;
 		writeLineSeparatedList(node.members());
@@ -301,7 +331,10 @@ public class HaxePrinter extends CSVisitor {
 		if (isExplicitMember(member))
 			return;
 
-		CSVisibility visibility = member.visibility();
+		writeVisibility(member.visibility());
+	}
+
+	private void writeVisibility(CSVisibility visibility) {
 		switch (visibility) {
 		case Internal:
 			write("public");
@@ -316,7 +349,7 @@ public class HaxePrinter extends CSVisitor {
 			write("public");
 			break;
 		}
-		write(" ");
+		write(" ");		
 	}
 
 	private boolean isExplicitMember(CSMember member) {
@@ -342,26 +375,19 @@ public class HaxePrinter extends CSVisitor {
 		writeDoc(node);
 		writeAttributes(node);
 		if (node.isStatic()) {
-			writeIndented("static var __init = (function()");
-			writeLine();
+			writeIndented("static function __init__()");
 			node.body().accept(this);
-			writeIndented(")();");
 		} else {
 			writeVisibility(node);
-			write("function new");
+			write("function " + node.constructorMethod());
 			writeParameterList(node);
-			// TODO: generate this in body block
-			/*
-			 * if (null != node.chainedConstructorInvocation()) { write(" : ");
-			 * writeMethodInvocation(node.chainedConstructorInvocation()); }
-			 */
 			writeLine();
+			node.body().addStatement(new CSReturnStatement(node.body().startPosition(), new CSThisExpression()));
 			node.body().accept(this);
 		}
 	}
 
 	public void visit(CSDestructor node) {
-		// TODO: compiler warning for unsupported destructors
 	}
 
 	public void visit(CSMethod node) {
@@ -514,7 +540,6 @@ public class HaxePrinter extends CSVisitor {
 	}
 
 	public void visit(CSLockStatement node) {
-		// TODO: compiler warning for lock statement
 		node.body().accept(this);
 	}
 
@@ -724,8 +749,28 @@ public class HaxePrinter extends CSVisitor {
 	}
 
 	public void visit(CSConstructorInvocationExpression node) {
-		write("new ");
-		writeMethodInvocation(node);
+		if(node.constructorMethod() == null) {
+			// if we don't generate the constructor ourselves, we invoke it normally
+			write("new ");
+			writeMethodInvocation(node);
+		}
+		else if((node.expression() instanceof CSThisExpression) || (node.expression() instanceof CSBaseExpression)){
+			// for chained constructor invocations we call the according ctor method 
+			node.expression().accept(this);
+			write(".");
+			write(node.constructorMethod());
+			writeParameterList(node.arguments());
+		}
+		else {
+			// for normal constructor calles of own constructors we call the default constructor
+			// and call the according ctor method
+			write("new ");
+			node.expression().accept(this);
+			writeTypeArguments(node);
+			write("().");
+			write(node.constructorMethod());
+			writeParameterList(node.arguments());
+		}
 	}
 
 	public void visit(CSMethodInvocationExpression node) {
@@ -984,6 +1029,7 @@ public class HaxePrinter extends CSVisitor {
 		if (!node.arguments().isEmpty()) {
 			writeParameterList(node.arguments());
 		}
+		writeLine();
 	}
 
 	@Override

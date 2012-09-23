@@ -26,7 +26,6 @@ import java.io.Writer;
 import java.util.HashMap;
 import java.util.Map;
 
-import sharpen.core.csharp.CSharpPrinter;
 import sharpen.core.csharp.ast.CSCompilationUnit;
 import sharpen.core.framework.*;
 import sharpen.core.haxe.HaxePrinter;
