@@ -24,7 +24,7 @@ import java.lang.reflect.*;
 
 public class ConfigurationFactory {
 
-	public static final String DEFAULT_RUNTIME_TYPE_NAME = "Sharpen.Runtime";
+	public static final String DEFAULT_RUNTIME_TYPE_NAME = "haxen.Runtime";
 	
 	private ConfigurationFactory() {}
 	

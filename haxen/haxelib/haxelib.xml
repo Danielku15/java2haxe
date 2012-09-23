@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<project name="haxen" url="http://danielku15.github.com/java2haxe/" license="Public">
+    <user name="danielku15"/>
+    <tag v="cross"/>
+    <description>A Haxe implementation of the Java standard library. Required by the java2haxe converter.</description>
+    <version name="0.1">Unfinished development version</version>
+</project>
