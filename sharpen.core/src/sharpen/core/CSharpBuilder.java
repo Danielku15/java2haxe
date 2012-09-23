@@ -1276,7 +1276,6 @@ public class CSharpBuilder extends ASTVisitor {
 	}
 
 	private boolean isDestructor(MethodDeclaration node) {
-		warning(node, "Haxe does not support destructors, skpping destructor");
 		return node.getName().toString().equals("finalize");
 	}
 
@@ -1434,8 +1433,7 @@ public class CSharpBuilder extends ASTVisitor {
 
 	private void processMethodDeclaration(MethodDeclaration node) {
 		if (isDestructor(node)) {
-			mapMethodParts(node, new CSDestructor());
-			return;
+			warning(node, "Haxe does not support destructors, generated as finalize method");
 		}
 
 		if (node.isConstructor()) {
