@@ -629,6 +629,8 @@ public class HaxePrinter extends CSVisitor {
 			write("true");
 		}
 		writeLine("} );");
+		
+		leaveBody();
 	}
 
 	public void visit(CSBreakStatement node) {
